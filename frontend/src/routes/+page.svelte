@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-
 	enum WordState {
 		NotStarted,
 		PartiallyCorrect,
@@ -16,10 +14,7 @@
 
 	let currentBuffer: BufferedWord[];
 	let currentWordIndex: number = 0;
-
-	onMount(() => {
-		currentBuffer = stringToWords('this is a test string to write');
-	});
+	currentBuffer = stringToWords('this is a test string to write');
 
 	function onKeyDown(event: KeyboardEvent) {
 		console.log(event);
@@ -31,6 +26,10 @@
 			if (event.key === 'Backspace') {
 				currentBuffer[currentWordIndex].buffer = currentWord.buffer.slice(0, -1);
 			} else if (event.key === ' ') {
+				if (currentWord.buffer !== currentWord.word) {
+					currentBuffer[currentWordIndex].state = WordState.Incorrect;
+				}
+
 				currentWordIndex++;
 			} else {
 				currentBuffer[currentWordIndex].buffer += event.key;
@@ -49,6 +48,13 @@
 		return buffered.buffer.length == buffered.word.length
 			? WordState.Correct
 			: WordState.PartiallyCorrect;
+	}
+
+	function getWordColor(buffered: BufferedWord): string {
+		if (buffered.state === WordState.Incorrect) return 'color: red';
+		if (buffered.state === WordState.NotStarted) return 'color: gray';
+
+		return 'color: black';
 	}
 
 	function stringToWords(text: string): BufferedWord[] {
@@ -72,3 +78,9 @@
 <svelte:body on:keydown={onKeyDown} />
 
 <h1>Write this text: {JSON.stringify(currentBuffer)}</h1>
+
+<div style="font-size: xx-large;">
+	{#each currentBuffer as buffered}
+		<span style={getWordColor(buffered)}>{buffered.word} </span>
+	{/each}
+</div>
