@@ -1,125 +1,155 @@
 <script lang="ts">
-	enum WordState {
+	enum CharState {
 		NotStarted,
-		PartiallyCorrect,
+		Extra,
 		Correct,
 		Incorrect
 	}
 
-	type BufferedWord = {
-		word: string;
-		buffer: string;
-		state: WordState;
-		errored: number[];
+	type InputChar = {
+		val: string;
+		state: CharState;
 	};
 
-	let currentBuffer: BufferedWord[];
+	type InputWord = {
+		characters: InputChar[];
+		finished: boolean;
+	};
+
+	let words: InputWord[];
 	let currentWordIndex: number = 0;
-	currentBuffer = stringToWords('this is a test string to write');
+	let currentCharIndex: number = 0;
+
+	words = stringToWords('this is a test string to write');
 
 	function onKeyDown(event: KeyboardEvent) {
 		console.log(event);
 
 		if (checkKeyAllowed(event)) {
 			event.preventDefault();
-			let currentWord = currentBuffer[currentWordIndex];
+			processAllowedKey(event.key);
+		} else if (event.key === ' ') {
+			event.preventDefault();
 
-			if (event.key === 'Backspace') {
-				currentBuffer[currentWordIndex].buffer = currentWord.buffer.slice(0, -1);
-
-				if (
-					currentBuffer[currentWordIndex].buffer.length == 0 &&
-					currentBuffer[currentWordIndex - 1].state !== WordState.Correct
-				) {
-					currentBuffer[currentWordIndex].state = getBufferState(currentBuffer[currentWordIndex]);
-
-					currentWordIndex--;
-				}
-			} else if (event.key === ' ') {
-				if (currentWord.buffer !== currentWord.word) {
-					currentBuffer[currentWordIndex].state = WordState.Incorrect;
-				}
-
+			if (currentWordIndex + 1 < words.length) {
 				currentWordIndex++;
+				currentCharIndex = 0;
+			}
+		} else if (event.key === 'Backspace') {
+			event.preventDefault();
+			processBackspace();
+		}
+	}
+
+	function processBackspace() {
+		if (currentCharIndex > 0) {
+			if (words[currentWordIndex].characters[currentCharIndex - 1].state == CharState.Extra) {
+				words[currentWordIndex].characters.pop();
+
+				// svelte re-renders elements only when they are "assigned"
+				words[currentWordIndex] = words[currentWordIndex];
 			} else {
-				currentBuffer[currentWordIndex].buffer += event.key;
+				words[currentWordIndex].characters[currentCharIndex - 1].state = CharState.NotStarted;
 			}
 
-			currentBuffer[currentWordIndex].state = getBufferState(currentBuffer[currentWordIndex]);
+			currentCharIndex--;
+			return;
+		}
+
+		if (currentWordIndex > 0 && !words[currentWordIndex - 1].finished) {
+			currentCharIndex = words[currentWordIndex - 1].characters.length;
+			currentWordIndex--;
 		}
 	}
 
-	function getBufferState(buffered: BufferedWord): WordState {
-		if (buffered.buffer.length == 0) return WordState.NotStarted;
-		if (buffered.buffer.length > buffered.word.length) return WordState.Incorrect;
+	function processAllowedKey(key: string) {
+		let chars = words[currentWordIndex].characters;
 
-		let incorrect: boolean = false;
-		for (let i = 0; i < buffered.buffer.length; i++) {
-			if (buffered.word[i] !== buffered.buffer[i]) {
-				incorrect = true;
-				buffered.errored.push(i);
-			}
+		if (currentCharIndex + 1 > chars.length) {
+			chars.push({
+				state: CharState.Extra,
+				val: key
+			});
+		} else {
+			words[currentWordIndex].characters[currentCharIndex].state =
+				chars[currentCharIndex].val === key ? CharState.Correct : CharState.Incorrect;
 		}
 
-		if (incorrect) return WordState.Incorrect;
-		return buffered.buffer.length == buffered.word.length
-			? WordState.Correct
-			: WordState.PartiallyCorrect;
+		currentCharIndex++;
+		words[currentWordIndex].finished = wordFinished(words[currentWordIndex]);
 	}
 
-	function getWordColor(buffered: BufferedWord): string {
-		if (buffered.state === WordState.Incorrect) return 'color: red';
-		if (buffered.state === WordState.NotStarted) return 'color: gray';
+	function wordFinished(word: InputWord): boolean {
+		for (let character of word.characters) {
+			if (character.state != CharState.Correct) return false;
+		}
 
-		return 'color: black';
+		return true;
 	}
 
-	function stringToWords(text: string): BufferedWord[] {
+	function getCharColor(ichar: InputChar): string {
+		if (ichar.state === CharState.Incorrect) return 'incorrect';
+		if (ichar.state === CharState.Extra) return 'extra';
+		if (ichar.state === CharState.NotStarted) return 'not-started';
+
+		return 'correct';
+	}
+
+	function stringToWords(text: string): InputWord[] {
 		return text.split(' ').map((x) => {
 			return {
-				word: x,
-				buffer: '',
-				state: WordState.NotStarted,
-				errored: []
-			} as BufferedWord;
+				characters: x.split('').map((c) => {
+					return {
+						val: c,
+						state: CharState.NotStarted
+					} as InputChar;
+				}),
+				finished: false
+			} as InputWord;
 		});
 	}
 
 	// TODO: rewrite this
 	const allowedKeys =
-		'abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789!?.,;\'"\\][}{<>_+-=()&*^&%^$%#$!@~` ';
+		'abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789!?.,;\'"\\][}{<>_+-=()&*^&%^$%#$!@~`';
 	function checkKeyAllowed(event: KeyboardEvent) {
-		return allowedKeys.includes(event.key) || event.key === 'Backspace';
+		return allowedKeys.includes(event.key);
 	}
 </script>
 
 <svelte:body on:keydown={onKeyDown} />
 
-<h1>Write this text: {currentBuffer.map((x) => x.word).join(' ')}</h1>
+<h1>Write this text: {words.map((x) => x.characters.map((y) => y.val).join('')).join(' ')}</h1>
+<h2>{currentWordIndex} {currentCharIndex}</h2>
 
 <div style="font-size: xx-large;">
-	{#each currentBuffer as buffered}
-		<span style={getWordColor(buffered)}>{buffered.buffer} </span>
-	{/each}
-</div>
-
-<div style="font-size: 1.5rem;">
-	{#each currentBuffer as buffered}
-		<span style="margin: 0.25em; {getWordColor(buffered)}">{buffered.word}</span>
-	{/each}
-</div>
-
-<div style="font-size: xx-large;">
-	{#each currentBuffer as buffered}
+	{#each words as word}
 		<word>
-			{#each buffered.buffer as character, index}
-				<letter style={buffered.errored.includes(index) ? 'color: red' : 'color: black'}
-					>{character}</letter
-				>
+			{#each word.characters as character}
+				<letter class={getCharColor(character)}>{character.val}</letter>
 			{/each}
 		</word>
 	{/each}
 </div>
 
+<pre>
+{JSON.stringify(words, null, 2)}
+</pre>
+
 <style>
+	.correct {
+		color: black;
+	}
+
+	.not-started {
+		color: gray;
+	}
+
+	.incorrect {
+		color: red;
+	}
+
+	.extra {
+		color: darkred;
+	}
 </style>
