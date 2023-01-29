@@ -6,6 +6,12 @@
 	async function finishWriting() {
 		document.body.style.backgroundColor = 'green';
 	}
+
+	async function getWordsList() {
+		const response = await fetch('http://localhost:8080/words/25');
+		const words = await response.json();
+		return words.join(' ');
+	}
 </script>
 
 <div class="debug-selector">
@@ -14,11 +20,13 @@
 </div>
 
 <div class="main">
-	<KeyracerInput
-        input="tank head table boundless door crayon hulking important help highfalutin fragile lovely minor cooing marvelous"
-		{debug}
-		on:finished={finishWriting}
-	/>
+    {#await getWordsList() then words}
+        <KeyracerInput
+            input={words}
+            {debug}
+            on:finished={finishWriting}
+        />
+    {/await}
 </div>
 
 <style>
