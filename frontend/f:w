@@ -166,7 +166,7 @@
 	<KeyracerCaret bind:this={caret} />
 
 	{#each words as word, wi}
-		<word class={currentWordIndex > wi && !word.finished ? 'incorrect-word' : ''}>
+		<word style="position: relative;" class={currentWordIndex > wi && !word.finished ? 'incorrect-word' : ''}>
 			{#each word.characters as character, ci}
 				<letter
 					bind:this={character.elem}
@@ -194,18 +194,14 @@
 		max-width: 800px;
 	}
 
-	.incorrect-word > letter {
-		animation: border-bottom 0.5s;
-		animation-fill-mode: forwards;
-	}
-	@keyframes border-bottom {
-		0% {
-			border-bottom: 3px solid transparent;
-		}
-		100% {
-			border-bottom: 3px solid red;
-		}
-	}
+	.incorrect-word::before {
+    content: "";
+        position: absolute;
+        left: 25px;
+        bottom: 0;
+        height: 15px;
+        width: 70%;
+        border-bottom: 3px solid #000;}
 
 	.correct {
 		color: black;

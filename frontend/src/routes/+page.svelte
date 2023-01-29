@@ -8,7 +8,7 @@
 	}
 
 	async function getWordsList() {
-		const response = await fetch('http://localhost:8080/words/25');
+		const response = await fetch('http://localhost:8080/words/50');
 		const words = await response.json();
 		return words.join(' ');
 	}
