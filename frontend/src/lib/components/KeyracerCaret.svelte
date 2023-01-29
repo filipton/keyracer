@@ -2,9 +2,12 @@
 	import type { InputWord } from '$lib/types';
 
 	let caretLeft: number = 9;
-	let caretTop: number = 20;
+	let caretTop: number = 0;
+
+	let caretTopOffset: number = 68;
 
 	let caretBlinkTime: number = 5000;
+	let caretEnabled: boolean = false;
 	let caretBlinking: boolean = true;
 	let caretBlinkTimeout: any;
 
@@ -29,7 +32,9 @@
 		if (char.elem) {
 			const rect = char.elem.getBoundingClientRect();
 			caretLeft = rect.left + (currentCharIndex === charIndex ? 0 : rect.width);
-			caretTop = rect.top;
+			caretTop = rect.top - caretTopOffset;
+
+			caretEnabled = true;
 		} else {
 			setTimeout(() => processCaret(words, currentWordIndex, currentCharIndex), 0);
 		}
@@ -40,18 +45,32 @@
 	}
 </script>
 
-<div class="caret {caretBlinking ? 'blink' : ''}" style="left: {caretLeft}px; top: {caretTop}px" />
+<div class="caret-container">
+	<div
+		class="caret {caretBlinking ? 'blink' : ''} {caretEnabled ? 'after-init' : ''}"
+		style="left: {caretLeft}px; top: {caretTop}px"
+	/>
+</div>
 
 <style>
 	.caret {
 		width: 2px;
 		height: 43px;
+		position: relative;
+	}
+
+	.caret.after-init {
 		background-color: lime;
-		position: absolute;
 		transition: all 0.1s;
 	}
 
-	.blink {
+	.caret-container {
+		position: absolute;
+		top: 68px;
+		left: 0;
+	}
+
+	.blink.after-init {
 		animation: blink 1s infinite;
 	}
 	@keyframes blink {

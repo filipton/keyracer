@@ -2,13 +2,34 @@
 	import KeyracerInput from '$lib/components/KeyracerInput.svelte';
 
 	let debug: boolean = false;
+
+	async function finishWriting() {
+		document.body.style.backgroundColor = 'green';
+	}
 </script>
 
-<label for="debug">Debug</label>
-<input type="checkbox" id="debug" bind:checked={debug} />
+<div class="debug-selector">
+	<label for="debug">Debug</label>
+	<input type="checkbox" id="debug" bind:checked={debug} />
+</div>
 
-<br />
-<br />
-<br />
+<div class="main">
+	<KeyracerInput input="this is a test string to write" {debug} on:finished={finishWriting} />
+</div>
 
-<KeyracerInput input="this is a test string to write" {debug} />
+<style>
+	.main {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-wrap: wrap;
+    }
+
+	.debug-selector {
+		position: absolute;
+		top: 0;
+		right: 0;
+		padding: 1rem;
+	}
+</style>
