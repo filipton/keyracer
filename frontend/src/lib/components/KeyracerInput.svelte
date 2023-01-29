@@ -117,6 +117,8 @@
 		let chars = words[currentWordIndex].characters;
 
 		if (currentCharIndex + 1 > chars.length) {
+			if (chars.length > 32) return;
+
 			chars.push({
 				state: CharState.Extra,
 				elem: null,
@@ -149,7 +151,7 @@
 
 	// TODO: rewrite this
 	const allowedKeys =
-		'abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789!?.,;\'"\\][}{<>_+-=()&*^&%^$%#$!@~`';
+		'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?.,;\'"\\][}{<>_+-=()&*^&%^$%#$!@~`';
 	function checkKeyAllowed(event: KeyboardEvent) {
 		return allowedKeys.includes(event.key);
 	}
@@ -189,6 +191,7 @@
 	.words-container {
 		font-size: 2em;
 		font-family: 'Roboto Mono', monospace;
+		max-width: 800px;
 	}
 
 	.correct {

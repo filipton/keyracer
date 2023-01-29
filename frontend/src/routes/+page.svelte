@@ -14,17 +14,21 @@
 </div>
 
 <div class="main">
-	<KeyracerInput input="this is a test string to write" {debug} on:finished={finishWriting} />
+	<KeyracerInput
+        input="tank head table boundless door crayon hulking important help highfalutin fragile lovely minor cooing marvelous"
+		{debug}
+		on:finished={finishWriting}
+	/>
 </div>
 
 <style>
 	.main {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        flex-wrap: wrap;
-    }
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100vh;
+		flex-wrap: wrap;
+	}
 
 	.debug-selector {
 		position: absolute;
