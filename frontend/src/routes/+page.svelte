@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	enum CharState {
 		NotStarted,
 		Extra,
@@ -8,6 +10,7 @@
 
 	type InputChar = {
 		val: string;
+		elem: HTMLElement | null;
 		state: CharState;
 	};
 
@@ -16,15 +19,25 @@
 		finished: boolean;
 	};
 
+	let caretElement: Element;
+	let caretLeft: number = 9;
+	let caretTop: number = 20;
+
+	let caretBlinkTime: number = 5000;
+	let caretBlinking: boolean = true;
+	let caretBlinkTimeout: any;
+
 	let words: InputWord[];
 	let currentWordIndex: number = 0;
 	let currentCharIndex: number = 0;
 
-	words = stringToWords('this is a test string to write');
+	words = stringToWords('This is a test string to write');
+	onMount(() => {
+		processCaret();
+        caretBlinking = true;
+	});
 
 	function onKeyDown(event: KeyboardEvent) {
-		console.log(event);
-
 		if (checkKeyAllowed(event)) {
 			event.preventDefault();
 			processAllowedKey(event.key);
@@ -39,15 +52,37 @@
 			event.preventDefault();
 			processBackspace();
 		}
+
+		processCaret();
+	}
+
+	function processCaret() {
+		caretBlinking = false;
+
+		clearTimeout(caretBlinkTimeout);
+		caretBlinkTimeout = setTimeout(() => {
+			caretBlinking = true;
+		}, caretBlinkTime);
+
+		let charIndex =
+			currentCharIndex < words[currentWordIndex].characters.length
+				? currentCharIndex
+				: words[currentWordIndex].characters.length - 1;
+
+		const char = words[currentWordIndex].characters[charIndex];
+		if (char.elem) {
+			const rect = char.elem.getBoundingClientRect();
+			caretLeft = rect.left + (currentCharIndex === charIndex ? 0 : rect.width);
+			caretTop = rect.top;
+		} else {
+			setTimeout(() => processCaret(), 0);
+		}
 	}
 
 	function processBackspace() {
 		if (currentCharIndex > 0) {
 			if (words[currentWordIndex].characters[currentCharIndex - 1].state == CharState.Extra) {
-				words[currentWordIndex].characters.pop();
-
-				// svelte re-renders elements only when they are "assigned"
-				words[currentWordIndex] = words[currentWordIndex];
+				words[currentWordIndex].characters = words[currentWordIndex].characters.slice(0, -1);
 			} else {
 				words[currentWordIndex].characters[currentCharIndex - 1].state = CharState.NotStarted;
 			}
@@ -79,6 +114,7 @@
 		if (currentCharIndex + 1 > chars.length) {
 			chars.push({
 				state: CharState.Extra,
+				elem: null,
 				val: key
 			});
 		} else {
@@ -129,15 +165,24 @@
 </script>
 
 <svelte:body on:keydown={onKeyDown} />
-
-<h1>Write this text: {words.map((x) => x.characters.map((y) => y.val).join('')).join(' ')}</h1>
 <h2>{currentWordIndex} {currentCharIndex} {words.filter((x) => !x.finished).length}</h2>
 
-<div style="font-size: xx-large;">
-	{#each words as word}
+<div style="font-size: 2em; margin-left: 2px;">
+	<div
+		bind:this={caretElement}
+		class="bar {caretBlinking ? 'blink' : ''}"
+		style="left: {caretLeft}px; top: {caretTop}px"
+	/>
+
+	{#each words as word, wi}
 		<word>
-			{#each word.characters as character}
-				<letter class={getCharColor(character)}>{character.val}</letter>
+			{#each word.characters as character, ci}
+				<letter
+					bind:this={character.elem}
+					class="{wi == currentWordIndex && ci == currentCharIndex ? 'current' : ''} {getCharColor(
+						character
+					)}">{character.val}</letter
+				>
 			{/each}
 		</word>
 	{/each}
@@ -148,6 +193,37 @@
 </pre>
 
 <style>
+	.bar {
+		width: 2px;
+		height: 43px;
+		background-color: lime;
+		position: absolute;
+		transition: all 0.1s;
+	}
+
+	.blink {
+		animation: blink 1s infinite;
+	}
+	@keyframes blink {
+		0% {
+			opacity: 0.25;
+		}
+		50% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0.25;
+		}
+	}
+
+	word {
+		font-family: 'Roboto Mono', monospace;
+	}
+
+	letter {
+		font-family: 'Roboto Mono', monospace;
+	}
+
 	.correct {
 		color: black;
 	}
@@ -157,10 +233,10 @@
 	}
 
 	.incorrect {
-		color: red;
+		color: darkred;
 	}
 
 	.extra {
-		color: darkred;
+		color: red;
 	}
 </style>
