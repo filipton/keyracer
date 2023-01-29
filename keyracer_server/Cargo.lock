@@ -582,6 +582,7 @@ dependencies = [
  "actix-web",
  "anyhow",
  "dotenv",
+ "rand",
 ]
 
 [[package]]
