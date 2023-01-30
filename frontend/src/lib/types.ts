@@ -15,3 +15,10 @@ export type InputWord = {
     characters: InputChar[];
     finished: boolean;
 };
+
+export type KeyracerFinishDetails = {
+    time: number;
+    words: InputWord[];
+    charsWritten: number;
+    charsCorrect: number;
+};

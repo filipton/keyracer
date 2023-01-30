@@ -31,7 +31,7 @@
 		const char = words[currentWordIndex].characters[charIndex];
 		if (char.elem) {
 			const rect = char.elem.getBoundingClientRect();
-			caretLeft = rect.left + (currentCharIndex === charIndex ? 0 : rect.width);
+			caretLeft = rect.left + (currentCharIndex === charIndex ? 0 : rect.width) - 0.5;
 			caretTop = rect.top - caretTopOffset + scrollY;
 
 			caretEnabled = true;
@@ -54,13 +54,13 @@
 
 <style>
 	.caret {
-		width: 2px;
+		width: 3px;
 		height: 43px;
 		position: relative;
 	}
 
 	.caret.after-init {
-		background-color: lime;
+		background-color: var(--caret-color);
 		transition: all 0.1s;
 	}
 

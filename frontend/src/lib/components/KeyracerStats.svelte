@@ -1,0 +1,81 @@
+<script lang="ts">
+	import { CharState, type KeyracerFinishDetails } from '$lib/types';
+	import { onMount } from 'svelte';
+
+	export let details: KeyracerFinishDetails;
+
+	let wpm: number = 0;
+	let rawWpm: number = 0;
+	let time: string = '0.00s';
+	let accuracy: string = '0%';
+
+	onMount(() => {
+		if (details) calculate();
+	});
+
+	function calculate() {
+		let filtered_words = details.words.filter((x) => x.finished);
+		let correct_chars =
+			filtered_words.reduce((total, curr) => (total += curr.characters.length), 0) +
+			filtered_words.length;
+
+		wpm = Math.round(correct_chars / 5 / (details.time / 60000));
+		time = `${Math.round(details.time / 10) / 100}s`;
+
+		let raw_chars =
+			details.words.reduce(
+				(total, curr) =>
+					(total += curr.characters.filter((x) => x.state !== CharState.NotStarted).length),
+				0
+			) +
+			details.words.length -
+			1;
+		rawWpm = Math.round(raw_chars / 5 / (details.time / 60000));
+		rawWpm = Math.max(rawWpm, wpm);
+		accuracy = `${Math.round((details.charsCorrect / details.charsWritten) * 100)}%`;
+	}
+</script>
+
+<div class="infos-holder">
+	<div class="info-box">
+		<h2>WPM</h2>
+		<h3>{wpm}</h3>
+	</div>
+	<div class="info-box">
+		<h2>RAW</h2>
+		<h3>{rawWpm}</h3>
+	</div>
+	<div class="info-box">
+		<h2>TIME</h2>
+		<h3>{time}</h3>
+	</div>
+	<div class="info-box">
+		<h2>ACC</h2>
+		<h3>{accuracy}</h3>
+	</div>
+</div>
+
+<style>
+	.infos-holder {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 1em;
+	}
+
+	.infos-holder > .info-box {
+		border: 1px solid var(--fg-color);
+		border-radius: 5px;
+		padding: 10px;
+
+		width: 4em;
+		height: 4em;
+
+		line-height: 0;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+</style>

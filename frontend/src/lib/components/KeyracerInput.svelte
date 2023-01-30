@@ -217,18 +217,18 @@
 	}
 
 	.correct {
-		color: black;
+		color: var(--l-correct-color);
 	}
 
 	.not-started {
-		color: gray;
+		color: var(--l-ns-color);
 	}
 
 	.incorrect {
-		color: darkred;
+		color: red;
 	}
 
 	.extra {
-		color: red;
+		color: darkred;
 	}
 </style>

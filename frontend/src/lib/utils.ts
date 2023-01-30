@@ -42,7 +42,7 @@ export function getCharColor(ichar: InputChar): string {
 
 // TODO: rewrite this
 const allowedKeys =
-    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?.,;\'"\\][}{<>_+-=()&*^&%^$%#$!@~`';
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?.,;:\'"\\][}{<>_+-=()&*^&%^$%#$!@~`';
 export function checkKeyAllowed(event: KeyboardEvent) {
     return allowedKeys.includes(event.key);
 }
