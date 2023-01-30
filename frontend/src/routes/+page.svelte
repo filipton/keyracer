@@ -3,9 +3,11 @@
 	import type { InputWord } from '$lib/types';
 
 	let debug: boolean = false;
+	let finished: boolean = false;
 
 	async function finishWriting(args: any) {
 		let details = args.detail as { time: number; words: InputWord[] };
+		finished = true;
 
 		setTimeout(() => {
 			let filtered_words = details.words.filter((x) => x.finished);
@@ -16,8 +18,7 @@
 				filtered_words.length;
 
 			let wpm = Math.round(correct_chars / 5 / (details.time / 60000));
-
-			alert('Calculated WPM: ' + wpm);
+			console.log('Calculated WPM: ' + wpm);
 		}, 200);
 	}
 
@@ -37,12 +38,21 @@
 <div class="debug-selector">
 	<label for="debug">Debug</label>
 	<input type="checkbox" id="debug" bind:checked={debug} />
+
+	<label for="finished">Finished</label>
+	<input type="checkbox" id="finished" bind:checked={finished} />
 </div>
 
 <div class="main">
-	{#await getWordsList(true) then words}
-		<KeyracerInput input={words} {debug} on:finished={finishWriting} />
-	{/await}
+	{#if finished}
+		<div class="main-screen">
+			<h1>Keyracer</h1>
+		</div>
+	{:else}
+		{#await getWordsList(true) then words}
+			<KeyracerInput input={words} {debug} on:finished={finishWriting} />
+		{/await}
+	{/if}
 </div>
 
 <style>
@@ -53,11 +63,34 @@
 		height: 100vh;
 		flex-wrap: wrap;
 	}
+	.main > * {
+		animation: fadeIn 1.5s;
+		animation-fill-mode: forwards;
+		opacity: 0;
+	}
+	@keyframes fadeIn {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+
+	.main-screen {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		height: 100vh;
+		width: 100vw;
+	}
 
 	.debug-selector {
 		position: absolute;
 		top: 0;
 		right: 0;
 		padding: 1rem;
+		z-index: 100;
 	}
 </style>

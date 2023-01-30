@@ -177,7 +177,6 @@
 <style>
 	.words-container {
 		font-size: 2em;
-		font-family: 'Roboto Mono', monospace;
 		max-width: 800px;
 	}
 
