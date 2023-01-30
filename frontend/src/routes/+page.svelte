@@ -3,12 +3,14 @@
 
 	let debug: boolean = false;
 
-	async function finishWriting() {
-		document.body.style.backgroundColor = 'green';
+	async function finishWriting(args: any) {
+        let details = args.detail as { time: number, words_count: number };
+
+        alert("Calculated WPM: " + Math.round((details.words_count / (details.time / 1000)) * 60));
 	}
 
 	async function getWordsList() {
-		const response = await fetch('http://localhost:8080/words/50');
+		const response = await fetch('http://localhost:8080/words/15');
 		const words = await response.json();
 		return words.join(' ');
 	}
@@ -20,13 +22,9 @@
 </div>
 
 <div class="main">
-    {#await getWordsList() then words}
-        <KeyracerInput
-            input={words}
-            {debug}
-            on:finished={finishWriting}
-        />
-    {/await}
+	{#await getWordsList() then words}
+		<KeyracerInput input={words} {debug} on:finished={finishWriting} />
+	{/await}
 </div>
 
 <style>

@@ -12,6 +12,7 @@
 	let currentWordIndex: number = 0;
 	let currentCharIndex: number = 0;
 
+	let startTime: number = -1;
 	let finished: boolean = false;
 	let dispatch = createEventDispatcher();
 
@@ -30,10 +31,14 @@
 		if (checkKeyAllowed(event)) {
 			event.preventDefault();
 			processAllowedKey(event.key);
+
+			if (startTime === -1) {
+				startTime = Date.now();
+			}
 		} else if (event.key === ' ') {
 			event.preventDefault();
 
-			if (currentWordIndex + 1 < words.length) {
+			if (currentWordIndex + 1 < words.length && currentCharIndex > 0) {
 				currentWordIndex++;
 				currentCharIndex = 0;
 			}
@@ -49,7 +54,10 @@
 			currentCharIndex === words[currentWordIndex].characters.length
 		) {
 			finished = true;
-			dispatch('finished');
+			dispatch('finished', {
+				time: Date.now() - startTime,
+				words_count: words.length
+			});
 		}
 	}
 
@@ -183,7 +191,21 @@
 	<div style="width: 100vw;">
 		<h1>Debug Info</h1>
 		<h2>Word: {currentWordIndex} Char: {currentCharIndex}</h2>
-		<pre>{JSON.stringify(words, null, 2)}</pre>
+		<pre>{JSON.stringify(
+				words.map((x) => {
+					return {
+						finished: x.finished,
+						characters: x.characters.map((c) => {
+							return {
+								val: c.val,
+								state: c.state
+							};
+						})
+					};
+				}),
+				null,
+				2
+			)}</pre>
 	</div>
 {/if}
 

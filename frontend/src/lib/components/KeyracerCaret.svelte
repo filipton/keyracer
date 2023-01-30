@@ -32,7 +32,7 @@
 		if (char.elem) {
 			const rect = char.elem.getBoundingClientRect();
 			caretLeft = rect.left + (currentCharIndex === charIndex ? 0 : rect.width);
-			caretTop = rect.top - caretTopOffset;
+			caretTop = rect.top - caretTopOffset + scrollY;
 
 			caretEnabled = true;
 		} else {
