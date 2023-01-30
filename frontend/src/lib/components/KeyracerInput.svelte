@@ -1,5 +1,12 @@
 <script lang="ts">
 	import { CharState, type InputChar, type InputWord } from '$lib/types';
+	import {
+		checkKeyAllowed,
+		getCharColor,
+		getLastCharIndex,
+		stringToWords,
+		wordFinished
+	} from '$lib/utils';
 	import { afterUpdate, createEventDispatcher, onMount } from 'svelte';
 	import KeyracerCaret from './KeyracerCaret.svelte';
 
@@ -42,37 +49,27 @@
 				currentWordIndex++;
 				currentCharIndex = 0;
 			}
+
+			if (currentWordIndex + 1 === words.length && currentCharIndex > 0) {
+				finished = true;
+				dispatch('finished', {
+					time: Date.now() - startTime,
+					words: words
+				});
+			}
 		} else if (event.key === 'Backspace') {
 			event.preventDefault();
 			processBackspace(event.ctrlKey);
 		}
 
 		caret.processCaret(words, currentWordIndex, currentCharIndex);
-
-		if (
-			currentWordIndex === words.length - 1 &&
-			currentCharIndex === words[currentWordIndex].characters.length
-		) {
+		if (currentWordIndex === words.length - 1 && words[currentWordIndex].finished) {
 			finished = true;
 			dispatch('finished', {
 				time: Date.now() - startTime,
-				words_count: words.length
+				words: words
 			});
 		}
-	}
-
-	function stringToWords(text: string): InputWord[] {
-		return text.split(' ').map((x) => {
-			return {
-				characters: x.split('').map((c) => {
-					return {
-						val: c,
-						state: CharState.NotStarted
-					} as InputChar;
-				}),
-				finished: false
-			} as InputWord;
-		});
 	}
 
 	function processBackspace(ctrlKey: boolean) {
@@ -111,15 +108,6 @@
 			currentWordIndex--;
 		}
 	}
-	function getLastCharIndex(chars: InputChar[]): number {
-		for (let [index, c] of chars.entries()) {
-			if (c.state === CharState.NotStarted) {
-				return index;
-			}
-		}
-
-		return chars.length;
-	}
 
 	function processAllowedKey(key: string) {
 		let chars = words[currentWordIndex].characters;
@@ -139,29 +127,6 @@
 
 		currentCharIndex++;
 		words[currentWordIndex].finished = wordFinished(words[currentWordIndex]);
-	}
-
-	function wordFinished(word: InputWord): boolean {
-		for (let character of word.characters) {
-			if (character.state != CharState.Correct) return false;
-		}
-
-		return true;
-	}
-
-	function getCharColor(ichar: InputChar): string {
-		if (ichar.state === CharState.Incorrect) return 'incorrect';
-		if (ichar.state === CharState.Extra) return 'extra';
-		if (ichar.state === CharState.NotStarted) return 'not-started';
-
-		return 'correct';
-	}
-
-	// TODO: rewrite this
-	const allowedKeys =
-		'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?.,;\'"\\][}{<>_+-=()&*^&%^$%#$!@~`';
-	function checkKeyAllowed(event: KeyboardEvent) {
-		return allowedKeys.includes(event.key);
 	}
 </script>
 

@@ -4,10 +4,19 @@ use actix_web::{
     App, HttpResponse, HttpServer, Responder,
 };
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug)]
 pub struct AppState {
     pub words_list: Vec<String>,
+    pub quotes_list: Vec<QouteEntry>,
+}
+
+#[allow(non_snake_case)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct QouteEntry {
+    pub quote: String,
+    pub author: String,
 }
 
 #[actix_web::main]
@@ -34,8 +43,14 @@ async fn main() -> std::io::Result<()> {
                     return Some(x.to_string());
                 })
                 .collect(),
+            quotes_list: serde_json::from_str(
+                std::fs::read_to_string("./quotes.json")
+                    .unwrap()
+                    .as_str(),
+            )
+            .unwrap(),
         };
-        
+
         let cors = actix_cors::Cors::default()
             .allow_any_origin()
             .send_wildcard()
@@ -46,7 +61,12 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(app_state.clone()))
-            .service(scope("").service(get_index).service(get_test))
+            .service(
+                scope("")
+                    .service(get_index)
+                    .service(get_test)
+                    .service(get_quotes_entry),
+            )
     })
     .bind(("0.0.0.0", port))?
     .run()
@@ -71,4 +91,12 @@ async fn get_test(data: web::Data<AppState>, path: web::Path<i64>) -> impl Respo
         .collect();
 
     return HttpResponse::Ok().json(random_words);
+}
+
+#[get("/quote")]
+async fn get_quotes_entry(data: web::Data<AppState>) -> impl Responder {
+    let mut rng = rand::thread_rng();
+    let index = rng.gen_range(0..data.quotes_list.len());
+
+    return HttpResponse::Ok().json(data.quotes_list[index].clone());
 }
