@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CharState, type InputChar, type InputWord } from '$lib/types';
+	import { CharState, type InputWord } from '$lib/types';
 	import {
 		checkKeyAllowed,
 		getCharColor,
@@ -19,6 +19,9 @@
 	let currentWordIndex: number = 0;
 	let currentCharIndex: number = 0;
 
+	let charsWritten: number = 0;
+	let charsCorrect: number = 0;
+
 	let startTime: number = -1;
 	let finished: boolean = false;
 	let dispatch = createEventDispatcher();
@@ -29,7 +32,7 @@
 		caret.setCaretBlinkState(true);
 	});
 	afterUpdate(() => {
-		caret.processCaret(words, currentWordIndex, currentCharIndex);
+		if (!finished) caret.processCaret(words, currentWordIndex, currentCharIndex);
 	});
 
 	function onKeyDown(event: KeyboardEvent) {
@@ -38,25 +41,9 @@
 		if (checkKeyAllowed(event)) {
 			event.preventDefault();
 			processAllowedKey(event.key);
-
-			if (startTime === -1) {
-				startTime = Date.now();
-			}
 		} else if (event.key === ' ') {
 			event.preventDefault();
-
-			if (currentWordIndex + 1 < words.length && currentCharIndex > 0) {
-				currentWordIndex++;
-				currentCharIndex = 0;
-			}
-
-			if (currentWordIndex + 1 === words.length && currentCharIndex > 0) {
-				finished = true;
-				dispatch('finished', {
-					time: Date.now() - startTime,
-					words: words
-				});
-			}
+			processSpace();
 		} else if (event.key === 'Backspace') {
 			event.preventDefault();
 			processBackspace(event.ctrlKey);
@@ -64,11 +51,34 @@
 
 		caret.processCaret(words, currentWordIndex, currentCharIndex);
 		if (currentWordIndex === words.length - 1 && words[currentWordIndex].finished) {
-			finished = true;
-			dispatch('finished', {
-				time: Date.now() - startTime,
-				words: words
-			});
+			finishWriting();
+		}
+	}
+
+	function finishWriting() {
+		finished = true;
+		dispatch('finished', {
+			time: Date.now() - startTime,
+			words: words,
+			charsWritten: charsWritten,
+			charsCorrect: charsCorrect
+		});
+	}
+
+	function processSpace() {
+		charsWritten++;
+
+		if (currentWordIndex + 1 < words.length && currentCharIndex > 0) {
+			if (currentCharIndex === words[currentWordIndex].characters.length) {
+				charsCorrect++;
+			}
+
+			currentWordIndex++;
+			currentCharIndex = 0;
+		}
+
+		if (currentWordIndex + 1 === words.length && currentCharIndex > 0) {
+			finishWriting();
 		}
 	}
 
@@ -123,10 +133,19 @@
 		} else {
 			words[currentWordIndex].characters[currentCharIndex].state =
 				chars[currentCharIndex].val === key ? CharState.Correct : CharState.Incorrect;
+
+			if (words[currentWordIndex].characters[currentCharIndex].state === CharState.Correct) {
+				charsCorrect++;
+			}
 		}
 
 		currentCharIndex++;
 		words[currentWordIndex].finished = wordFinished(words[currentWordIndex]);
+
+		charsWritten++;
+		if (startTime === -1) {
+			startTime = Date.now();
+		}
 	}
 </script>
 
@@ -178,6 +197,10 @@
 	.words-container {
 		font-size: 2em;
 		max-width: 800px;
+
+		-webkit-user-select: none; /* Safari */
+		-ms-user-select: none; /* IE 10 and IE 11 */
+		user-select: none; /* Standard syntax */
 	}
 
 	.incorrect-word > letter {
