@@ -1,185 +1,62 @@
 <script lang="ts">
 	import {
 		CharState,
-		type HistoryEntry,
+		type InputChar,
 		type InputWord,
 		type KeyracerFinishDetails
 	} from '$lib/types';
-	import {
-		checkKeyAllowed,
-		getCharColor,
-		getLastCharIndex,
-		stringToWords,
-		wordFinished
-	} from '$lib/utils';
 	import { afterUpdate, createEventDispatcher, onMount } from 'svelte';
+	import { KRInput } from './input';
 	import KeyracerCaret from './KeyracerCaret.svelte';
 
 	export let input: string;
 	export let debug: boolean = false;
-	let history: HistoryEntry[] = [];
 
 	let caret: KeyracerCaret;
+	let inputer: KRInput = new KRInput();
+	inputer.onFinish = (details: KeyracerFinishDetails) => {
+		finished = true;
+		dispatch('finished', details);
+	};
+	inputer.onWordsChanged = (_words: InputWord[]) => {
+		words = _words;
+	};
 
-	let words: InputWord[];
-	let currentWordIndex: number = 0;
-	let currentCharIndex: number = 0;
+	let words: InputWord[] = [];
 
-	let charsWritten: number = 0;
-	let charsCorrect: number = 0;
-
-	let startTime: number = -1;
 	let finished: boolean = false;
 	let dispatch = createEventDispatcher();
 
-	words = stringToWords(input);
 	onMount(() => {
-		caret.processCaret(words, currentWordIndex, currentCharIndex);
+		inputer.init(input);
+
+		caret.processCaret(inputer.words, inputer.currentWordIndex, inputer.currentCharIndex);
 		caret.setCaretBlinkState(true);
 	});
 	afterUpdate(() => {
-		if (!finished) caret.processCaret(words, currentWordIndex, currentCharIndex);
+		if (!finished)
+			caret.processCaret(inputer.words, inputer.currentWordIndex, inputer.currentCharIndex);
 	});
 
 	function onKeyDown(event: KeyboardEvent) {
 		if (finished) return;
+		inputer.processKeyEvent(event);
 
-		if (checkKeyAllowed(event)) {
-			event.preventDefault();
-			processAllowedKey(event.key);
-
-			history.push({
-				input: event.key,
-				time: Date.now() - startTime
-			});
-		} else if (event.key === ' ') {
-			event.preventDefault();
-			processSpace();
-
-			history.push({
-				input: ' ',
-				time: Date.now() - startTime
-			});
-		} else if (event.key === 'Backspace') {
-			event.preventDefault();
-			processBackspace(event.ctrlKey);
-
-			history.push({
-				input: `${event.ctrlKey ? '^' : ''}Bp`,
-				time: Date.now() - startTime
-			});
-		}
-
-		caret.processCaret(words, currentWordIndex, currentCharIndex);
-		if (currentWordIndex === words.length - 1 && words[currentWordIndex].finished) {
-			finishWriting();
-		}
+		caret.processCaret(inputer.words, inputer.currentWordIndex, inputer.currentCharIndex);
 	}
 
-	function finishWriting() {
-		finished = true;
-        
-		let filtered_words = words.filter((x) => x.finished);
-		let correct_chars_iw =
-			filtered_words.reduce((total, curr) => (total += curr.characters.length), 0) +
-			filtered_words.length;
+	function getCharColor(ichar: InputChar): string {
+		if (ichar.state === CharState.Incorrect) return 'incorrect';
+		if (ichar.state === CharState.Extra) return 'extra';
+		if (ichar.state === CharState.NotStarted) return 'not-started';
 
-		dispatch('finished', {
-			time: Date.now() - startTime,
-			words: words,
-			charsWritten: charsWritten,
-			charsCorrect: charsCorrect,
-            charsInCorrectWords: correct_chars_iw,
-			history: history
-		} as KeyracerFinishDetails);
-	}
-
-	function processSpace() {
-		charsWritten++;
-
-		if (currentWordIndex + 1 < words.length && currentCharIndex > 0) {
-			if (currentCharIndex === words[currentWordIndex].characters.length) {
-				charsCorrect++;
-			}
-
-			currentWordIndex++;
-			currentCharIndex = 0;
-		}
-
-		if (currentWordIndex + 1 === words.length && currentCharIndex > 0) {
-			finishWriting();
-		}
-	}
-
-	function processBackspace(ctrlKey: boolean) {
-		if (ctrlKey) {
-			if (currentCharIndex == 0 && currentWordIndex > 0 && !words[currentWordIndex - 1].finished) {
-				currentWordIndex--;
-			}
-
-			currentCharIndex = 0;
-			words[currentWordIndex].characters = words[currentWordIndex].characters
-				.filter((x) => x.state !== CharState.Extra)
-				.map((x) => {
-					x.state = CharState.NotStarted;
-					return x;
-				});
-
-			return;
-		}
-
-		// remove extra characters
-		if (currentCharIndex > 0) {
-			if (words[currentWordIndex].characters[currentCharIndex - 1].state == CharState.Extra) {
-				words[currentWordIndex].characters = words[currentWordIndex].characters.slice(0, -1);
-			} else {
-				words[currentWordIndex].characters[currentCharIndex - 1].state = CharState.NotStarted;
-			}
-
-			currentCharIndex--;
-			words[currentWordIndex].finished = wordFinished(words[currentWordIndex]);
-
-			return;
-		}
-
-		if (currentWordIndex > 0 && !words[currentWordIndex - 1].finished) {
-			currentCharIndex = getLastCharIndex(words[currentWordIndex - 1].characters);
-			currentWordIndex--;
-		}
-	}
-
-	function processAllowedKey(key: string) {
-		let chars = words[currentWordIndex].characters;
-
-		if (currentCharIndex + 1 > chars.length) {
-			if (chars.length > 32) return;
-
-			chars.push({
-				state: CharState.Extra,
-				elem: null,
-				val: key
-			});
-		} else {
-			words[currentWordIndex].characters[currentCharIndex].state =
-				chars[currentCharIndex].val === key ? CharState.Correct : CharState.Incorrect;
-
-			if (words[currentWordIndex].characters[currentCharIndex].state === CharState.Correct) {
-				charsCorrect++;
-			}
-		}
-
-		currentCharIndex++;
-		words[currentWordIndex].finished = wordFinished(words[currentWordIndex]);
-
-		charsWritten++;
-		if (startTime === -1) {
-			startTime = Date.now();
-		}
+		return 'correct';
 	}
 </script>
 
 <svelte:window
-	on:resize={() => caret.processCaret(words, currentWordIndex, currentCharIndex)}
+	on:resize={() =>
+		caret.processCaret(inputer.words, inputer.currentWordIndex, inputer.currentCharIndex)}
 	on:keydown={onKeyDown}
 />
 
@@ -187,13 +64,13 @@
 	<KeyracerCaret bind:this={caret} />
 
 	{#each words as word, wi}
-		<word class={currentWordIndex > wi && !word.finished ? 'incorrect-word' : ''}>
+		<word class={inputer.currentWordIndex > wi && !word.finished ? 'incorrect-word' : ''}>
 			{#each word.characters as character, ci}
 				<letter
 					bind:this={character.elem}
-					class="{wi == currentWordIndex && ci == currentCharIndex ? 'current' : ''} {getCharColor(
-						character
-					)}">{character.val}</letter
+					class="{wi == inputer.currentWordIndex && ci == inputer.currentCharIndex
+						? 'current'
+						: ''} {getCharColor(character)}">{character.val}</letter
 				>
 			{/each}
 		</word>
@@ -203,7 +80,6 @@
 {#if debug}
 	<div style="width: 100vw;">
 		<h1>Debug Info</h1>
-		<h2>Word: {currentWordIndex} Char: {currentCharIndex}</h2>
 		<pre>{JSON.stringify(
 				words.map((x) => {
 					return {
