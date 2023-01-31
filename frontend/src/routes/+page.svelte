@@ -1,19 +1,42 @@
 <script lang="ts">
 	import KeyracerInput from '$lib/components/KeyracerInput.svelte';
 	import KeyracerStats from '$lib/components/KeyracerStats.svelte';
-	import type { KeyracerFinishDetails } from '$lib/types';
+	import type { KeyracerFinishDetails, KeyracerResponse, QuoteJson } from '$lib/types';
 
 	let debug: boolean = false;
 	let finished: boolean = false;
+	let selectedQuotes: boolean = false;
 
 	let finishedDetails: KeyracerFinishDetails;
 
 	async function finishWriting(args: any) {
 		finishedDetails = args.detail;
 		finished = true;
+
+		let keystrokesStr: string = finishedDetails.history
+			.map((x) => `${x.time}><${x.input}`)
+			.join('\n');
+		let data: KeyracerResponse = {
+			time: finishedDetails.time,
+			chars_written: finishedDetails.charsWritten,
+			chars_correct: finishedDetails.charsCorrect,
+			history: keystrokesStr
+		};
+
+		await fetch('http://localhost:8080/response', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		}).then(async (x: Response) => {
+			if (!x.ok) {
+				alert('Error');
+			}
+		});
 	}
 
-	async function getWordsList(quote: boolean = false) {
+	async function getWordsList(quote: boolean = false): Promise<string> {
 		if (!quote) {
 			const response = await fetch('http://localhost:8080/words/15');
 			const words = await response.json();
@@ -21,12 +44,15 @@
 		}
 
 		const response = await fetch('http://localhost:8080/quote');
-		const qresp = (await response.json()) as { quote: string; author: string };
+		const qresp: QuoteJson = await response.json();
 		return qresp.quote;
 	}
 </script>
 
 <div class="debug-selector">
+	<label for="quotes">Quotes</label>
+	<input type="checkbox" id="quotes" bind:checked={selectedQuotes} />
+
 	<label for="debug">Debug</label>
 	<input type="checkbox" id="debug" bind:checked={debug} />
 
@@ -51,7 +77,7 @@
 			>
 		</div>
 	{:else}
-		{#await getWordsList(true) then words}
+		{#await getWordsList(selectedQuotes) then words}
 			<KeyracerInput input={words} {debug} on:finished={finishWriting} />
 		{/await}
 	{/if}

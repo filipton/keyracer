@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CharState, type InputWord } from '$lib/types';
+	import { CharState, type HistoryEntry, type InputWord } from '$lib/types';
 	import {
 		checkKeyAllowed,
 		getCharColor,
@@ -12,6 +12,7 @@
 
 	export let input: string;
 	export let debug: boolean = false;
+	let history: HistoryEntry[] = [];
 
 	let caret: KeyracerCaret;
 
@@ -41,12 +42,27 @@
 		if (checkKeyAllowed(event)) {
 			event.preventDefault();
 			processAllowedKey(event.key);
+
+			history.push({
+				input: event.key,
+				time: Date.now() - startTime
+			});
 		} else if (event.key === ' ') {
 			event.preventDefault();
 			processSpace();
+
+			history.push({
+				input: ' ',
+				time: Date.now() - startTime
+			});
 		} else if (event.key === 'Backspace') {
 			event.preventDefault();
 			processBackspace(event.ctrlKey);
+
+			history.push({
+				input: `${event.ctrlKey ? '^' : ''}Bp`,
+				time: Date.now() - startTime
+			});
 		}
 
 		caret.processCaret(words, currentWordIndex, currentCharIndex);
@@ -61,7 +77,8 @@
 			time: Date.now() - startTime,
 			words: words,
 			charsWritten: charsWritten,
-			charsCorrect: charsCorrect
+			charsCorrect: charsCorrect,
+            history: history
 		});
 	}
 

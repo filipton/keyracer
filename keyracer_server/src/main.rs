@@ -1,5 +1,5 @@
 use actix_web::{
-    get,
+    get, post,
     web::{self, scope},
     App, HttpResponse, HttpServer, Responder,
 };
@@ -17,6 +17,28 @@ pub struct AppState {
 pub struct QouteEntry {
     pub quote: String,
     pub author: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct KeyracerResponse {
+    time: i64,
+    chars_written: i32,
+    chars_correct: i32,
+    history: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct KeyracerData {
+    time: i64,
+    chars_written: i32,
+    chars_correct: i32,
+    history: Vec<HistoryEntry>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct HistoryEntry {
+    pub time: i32,
+    pub input: String,
 }
 
 #[actix_web::main]
@@ -44,9 +66,7 @@ async fn main() -> std::io::Result<()> {
                 })
                 .collect(),
             quotes_list: serde_json::from_str(
-                std::fs::read_to_string("./quotes.json")
-                    .unwrap()
-                    .as_str(),
+                std::fs::read_to_string("./quotes.json").unwrap().as_str(),
             )
             .unwrap(),
         };
@@ -65,7 +85,8 @@ async fn main() -> std::io::Result<()> {
                 scope("")
                     .service(get_index)
                     .service(get_test)
-                    .service(get_quotes_entry),
+                    .service(get_quotes_entry)
+                    .service(post_keyracer_response),
             )
     })
     .bind(("0.0.0.0", port))?
@@ -99,4 +120,28 @@ async fn get_quotes_entry(data: web::Data<AppState>) -> impl Responder {
     let index = rng.gen_range(0..data.quotes_list.len());
 
     return HttpResponse::Ok().json(data.quotes_list[index].clone());
+}
+
+#[post("/response")]
+async fn post_keyracer_response(response_data: web::Json<KeyracerResponse>) -> impl Responder {
+    let data: KeyracerData = KeyracerData {
+        time: response_data.time,
+        chars_written: response_data.chars_written,
+        chars_correct: response_data.chars_correct,
+        history: response_data
+            .history
+            .lines()
+            .map(|x| {
+                let splitted: Vec<&str> = x.split("><").collect();
+
+                return HistoryEntry {
+                    time: splitted[0].to_string().parse().unwrap(),
+                    input: splitted[1].to_string(),
+                };
+            })
+            .collect(),
+    };
+    println!("{:?}", data);
+
+    return HttpResponse::Ok().body("");
 }

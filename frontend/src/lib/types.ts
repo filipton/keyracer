@@ -21,4 +21,22 @@ export type KeyracerFinishDetails = {
     words: InputWord[];
     charsWritten: number;
     charsCorrect: number;
+    history: HistoryEntry[];
+};
+
+export type QuoteJson = {
+    quote: string;
+    author: string;
+};
+
+export type KeyracerResponse = {
+    time: number;
+    chars_written: number;
+    chars_correct: number;
+    history: string;
+};
+
+export type HistoryEntry = {
+    input: string;
+    time: number;
 };
