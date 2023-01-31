@@ -24,6 +24,7 @@ pub struct KeyracerResponse {
     time: i64,
     chars_written: i32,
     chars_correct: i32,
+    chars_in_correct_words: i32,
     history: String,
 }
 
@@ -32,6 +33,7 @@ pub struct KeyracerData {
     time: i64,
     chars_written: i32,
     chars_correct: i32,
+    chars_in_correct_words: i32,
     history: Vec<HistoryEntry>,
 }
 
@@ -128,6 +130,7 @@ async fn post_keyracer_response(response_data: web::Json<KeyracerResponse>) -> i
         time: response_data.time,
         chars_written: response_data.chars_written,
         chars_correct: response_data.chars_correct,
+        chars_in_correct_words: response_data.chars_in_correct_words,
         history: response_data
             .history
             .lines()
@@ -141,7 +144,17 @@ async fn post_keyracer_response(response_data: web::Json<KeyracerResponse>) -> i
             })
             .collect(),
     };
-    println!("{:?}", data);
+
+    let wpm_time = response_data.time as f64 / 60000f64;
+    let wpm = response_data.chars_in_correct_words as f64 / 5f64 / wpm_time;
+
+    let time = format!("{:.2}s", response_data.time as f64 / 10f64 / 100f64);
+    let accuracy = format!(
+        "{:.2}%",
+        response_data.chars_correct as f64 / response_data.chars_written as f64 * 100f64
+    );
+
+    println!("WPM: {:.2}  TIME: {}  ACC: {}", wpm, time, accuracy);
 
     return HttpResponse::Ok().body("");
 }

@@ -20,6 +20,7 @@
 			time: finishedDetails.time,
 			chars_written: finishedDetails.charsWritten,
 			chars_correct: finishedDetails.charsCorrect,
+            chars_in_correct_words: finishedDetails.charsInCorrectWords,
 			history: keystrokesStr
 		};
 

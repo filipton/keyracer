@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { CharState, type HistoryEntry, type InputWord } from '$lib/types';
+	import {
+		CharState,
+		type HistoryEntry,
+		type InputWord,
+		type KeyracerFinishDetails
+	} from '$lib/types';
 	import {
 		checkKeyAllowed,
 		getCharColor,
@@ -73,13 +78,20 @@
 
 	function finishWriting() {
 		finished = true;
+        
+		let filtered_words = words.filter((x) => x.finished);
+		let correct_chars_iw =
+			filtered_words.reduce((total, curr) => (total += curr.characters.length), 0) +
+			filtered_words.length;
+
 		dispatch('finished', {
 			time: Date.now() - startTime,
 			words: words,
 			charsWritten: charsWritten,
 			charsCorrect: charsCorrect,
-            history: history
-		});
+            charsInCorrectWords: correct_chars_iw,
+			history: history
+		} as KeyracerFinishDetails);
 	}
 
 	function processSpace() {

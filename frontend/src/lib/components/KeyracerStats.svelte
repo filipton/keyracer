@@ -14,12 +14,7 @@
 	});
 
 	function calculate() {
-		let filtered_words = details.words.filter((x) => x.finished);
-		let correct_chars =
-			filtered_words.reduce((total, curr) => (total += curr.characters.length), 0) +
-			filtered_words.length;
-
-		wpm = Math.round(correct_chars / 5 / (details.time / 60000));
+		wpm = Math.round(details.charsInCorrectWords / 5 / (details.time / 60000));
 		time = `${Math.round(details.time / 10) / 100}s`;
 
 		let raw_chars =

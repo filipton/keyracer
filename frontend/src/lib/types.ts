@@ -21,6 +21,7 @@ export type KeyracerFinishDetails = {
     words: InputWord[];
     charsWritten: number;
     charsCorrect: number;
+    charsInCorrectWords: number;
     history: HistoryEntry[];
 };
 
@@ -33,6 +34,7 @@ export type KeyracerResponse = {
     time: number;
     chars_written: number;
     chars_correct: number;
+    chars_in_correct_words: number;
     history: string;
 };
 
