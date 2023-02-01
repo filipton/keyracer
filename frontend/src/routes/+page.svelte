@@ -2,6 +2,9 @@
 	import KeyracerInput from '$lib/components/KeyracerInput.svelte';
 	import KeyracerStats from '$lib/components/KeyracerStats.svelte';
 	import type { KeyracerFinishDetails, KeyracerResponse, QuoteJson } from '$lib/types';
+	import { onMount } from 'svelte';
+
+	let testBtn: HTMLElement;
 
 	let debug: boolean = false;
 	let finished: boolean = false;
@@ -117,8 +120,10 @@
 
 	.debug-selector {
 		position: absolute;
+		transform: translate(50%, 0%);
+
 		top: 0;
-		right: 0;
+		right: 50%;
 		padding: 1rem;
 		z-index: 100;
 	}
