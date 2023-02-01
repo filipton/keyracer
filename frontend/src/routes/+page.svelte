@@ -53,7 +53,7 @@
 	}
 </script>
 
-<div class="debug-selector">
+<div class="debug-selector" style="display: none;">
 	<label for="quotes">Quotes</label>
 	<input type="checkbox" id="quotes" bind:checked={selectedQuotes} />
 

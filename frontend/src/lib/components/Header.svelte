@@ -1,4 +1,8 @@
 <div class="header">
+    <div style="width: 1.5rem; height: 1.5rem;" />
+
+	<a href="/" class="logo">KEYRACER</a>
+
 	<a href="/account">
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
@@ -6,7 +10,7 @@
 			viewBox="0 0 24 24"
 			stroke-width="2"
 			stroke="currentColor"
-			style="width: 24px; height: 24px"
+			style="width: 1.5rem; height: 1.5rem;"
 		>
 			<path
 				stroke-linecap="round"
@@ -20,14 +24,25 @@
 <style>
 	.header {
 		display: flex;
-		justify-content: right;
+		justify-content: center;
 		align-items: center;
+        max-width: 960px;
 		padding: 15px;
+
+        margin: 0 auto;
 	}
 
 	.header > a {
 		color: white;
+		text-decoration: none;
 		transition: color 0.5s;
+	}
+
+	.header > a.logo {
+		font-size: 1.2rem;
+		font-weight: 600;
+		margin-right: auto;
+		margin-left: auto;
 	}
 
 	.header > a:hover {

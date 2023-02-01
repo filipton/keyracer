@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	let showLoginScreen: boolean = false;
 	let googleButton: HTMLElement;
 
 	onMount(() => {
@@ -25,43 +26,49 @@
 	async function handleCredentialResponse(response: any) {
 		const { credential } = response;
 
-        if (credential) {
-            await fetch("http://localhost:8080/auth", 
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(credential)
-                }
-            )
-            .then(res => res.text())
-            .then(x => console.log(x));
-        }
+		if (credential) {
+			await fetch('http://localhost:8080/auth', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(credential)
+			})
+				.then((res) => res.text())
+				.then((x) => console.log(x));
+		}
+	}
+
+	function toggle() {
+		showLoginScreen = !showLoginScreen;
 	}
 </script>
 
-<!---<a class="btn">Test</a>--->
-<div class="googleSignIn">
-	<div id="buttonDiv" bind:this={googleButton} />
-	<div class="buttonMask" />
+<div class="container">
+	<button on:click={() => toggle()} class="btn"> Login </button>
+</div>
+
+<div class="googleSignIn" style={showLoginScreen ? '' : 'display: none'}>
+	<div bind:this={googleButton} />
 </div>
 
 <style>
 	.googleSignIn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		flex-direction: column;
 	}
 
-	.buttonMask {
-		width: 250px;
-		height: 44px;
-		background-color: var(--bg-color);
-
-		position: absolute;
-		top: calc(59px + 40px);
-		z-index: 1000;
-	}
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
 </style>
