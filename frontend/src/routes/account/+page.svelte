@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { apiUrl } from '$lib/types';
 	import { onMount } from 'svelte';
 
 	let showLoginScreen: boolean = false;
@@ -27,7 +28,7 @@
 		const { credential } = response;
 
 		if (credential) {
-			await fetch('http://localhost:8080/auth', {
+			await fetch(`${apiUrl}/auth`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -54,10 +55,10 @@
 
 <style>
 	.googleSignIn {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 
 		display: flex;
 		justify-content: center;
@@ -65,10 +66,10 @@
 		flex-direction: column;
 	}
 
-    .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-    }
+	.container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+	}
 </style>

@@ -1,7 +1,12 @@
 <script lang="ts">
 	import KeyracerInput from '$lib/components/KeyracerInput.svelte';
 	import KeyracerStats from '$lib/components/KeyracerStats.svelte';
-	import type { KeyracerFinishDetails, KeyracerResponse, QuoteJson } from '$lib/types';
+	import {
+		apiUrl,
+		type KeyracerFinishDetails,
+		type KeyracerResponse,
+		type QuoteJson
+	} from '$lib/types';
 
 	let debug: boolean = false;
 	let finished: boolean = false;
@@ -24,7 +29,7 @@
 			history: keystrokesStr
 		};
 
-		await fetch('http://localhost:8080/response', {
+		await fetch(`${apiUrl}/response`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -39,12 +44,12 @@
 
 	async function getWordsList(quote: boolean = false): Promise<string> {
 		if (!quote) {
-			const response = await fetch('http://localhost:8080/words/15');
+			const response = await fetch(`${apiUrl}/words/15`);
 			const words = await response.json();
 			return words.join(' ');
 		}
 
-		const response = await fetch('http://localhost:8080/quote');
+		const response = await fetch(`${apiUrl}/quote`);
 		const qresp: QuoteJson = await response.json();
 		return qresp.quote;
 	}
