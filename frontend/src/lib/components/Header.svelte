@@ -33,7 +33,7 @@
 	}
 
 	.header > a {
-		color: white;
+		color: var(--fg-color);
 		text-decoration: none;
 		transition: color 0.5s;
 	}

@@ -1,4 +1,4 @@
-export const apiUrl = "http://localhost:8080";
+export const apiUrl = "https://kr.filipton.space";
 
 export enum CharState {
     NotStarted,
