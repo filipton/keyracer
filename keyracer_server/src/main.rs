@@ -121,13 +121,15 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .app_data(web::Data::new(app_state.clone()))
             .service(
-                scope("")
-                    .service(get_index)
-                    .service(get_test)
-                    .service(test)
-                    .service(get_quotes_entry)
-                    .service(test_google_auth)
-                    .service(post_keyracer_response),
+                scope("/api").service(
+                    scope("")
+                        .service(get_index)
+                        .service(get_test)
+                        .service(test)
+                        .service(get_quotes_entry)
+                        .service(test_google_auth)
+                        .service(post_keyracer_response),
+                ),
             )
     })
     .bind(("0.0.0.0", port))?
@@ -156,7 +158,7 @@ async fn get_google_certs() -> Result<HashMap<String, DecodingKey>, ()> {
     return Ok(google_jwks);
 }
 
-#[get("/")]
+#[get("")]
 async fn get_index() -> impl Responder {
     return HttpResponse::Ok().body("Nothing here yet!");
 }
