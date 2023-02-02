@@ -2,9 +2,6 @@
 	import KeyracerInput from '$lib/components/KeyracerInput.svelte';
 	import KeyracerStats from '$lib/components/KeyracerStats.svelte';
 	import type { KeyracerFinishDetails, KeyracerResponse, QuoteJson } from '$lib/types';
-	import { onMount } from 'svelte';
-
-	let testBtn: HTMLElement;
 
 	let debug: boolean = false;
 	let finished: boolean = false;
@@ -51,24 +48,32 @@
 		const qresp: QuoteJson = await response.json();
 		return qresp.quote;
 	}
+
+	async function onKeyDown(event: KeyboardEvent) {
+		if (event.key === '~' && event.ctrlKey) {
+			event.preventDefault();
+			debug = !debug;
+		}
+	}
 </script>
 
-<div class="debug-selector" style="display: none;">
-	<label for="quotes">Quotes</label>
-	<input type="checkbox" id="quotes" bind:checked={selectedQuotes} />
+<svelte:window on:keydown={onKeyDown} />
 
-	<label for="debug">Debug</label>
-	<input type="checkbox" id="debug" bind:checked={debug} />
+{#if debug}
+	<div class="debug-selector">
+		<h1 style="text-align: center; line-height: 0;">Debug</h1>
 
-	<label for="finished">Finished</label>
-	<input type="checkbox" id="finished" bind:checked={finished} />
-</div>
+		<label for="quotes">Quotes</label>
+		<input type="checkbox" id="quotes" bind:checked={selectedQuotes} />
+
+		<label for="finished">Finished</label>
+		<input type="checkbox" id="finished" bind:checked={finished} />
+	</div>
+{/if}
 
 <div class="main">
 	{#if finished}
 		<div class="main-screen">
-			<h1>KEYRACER</h1>
-
 			<h2>STATS</h2>
 			<KeyracerStats details={finishedDetails} />
 
@@ -92,10 +97,14 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		height: 100vh;
 		flex-wrap: wrap;
-	}
-	.main > * {
+
+		height: calc(100vh - 59px);
+
+		margin-left: auto;
+		margin-right: auto;
+		max-width: 960px;
+
 		animation: fadeIn 1.5s;
 		animation-fill-mode: forwards;
 		opacity: 0;
@@ -114,8 +123,8 @@
 		flex-direction: column;
 		align-items: center;
 
-		height: 100vh;
-		width: 100vw;
+		height: 100%;
+		width: 100%;
 	}
 
 	.debug-selector {
@@ -124,7 +133,11 @@
 
 		top: 0;
 		right: 50%;
-		padding: 1rem;
+		padding: 0rem 1rem 1rem 1rem;
 		z-index: 100;
+
+		background-color: var(--bg-color);
+		border: 1px solid var(--fg-color);
+		border-top: none;
 	}
 </style>

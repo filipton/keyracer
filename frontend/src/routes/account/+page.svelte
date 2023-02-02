@@ -35,7 +35,7 @@
 				body: JSON.stringify(credential)
 			})
 				.then((res) => res.text())
-				.then((x) => console.log(x));
+				.then((x) => alert(x));
 		}
 	}
 

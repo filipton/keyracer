@@ -39,7 +39,7 @@
 	});
 
 	function onKeyDown(event: KeyboardEvent) {
-		if (finished) return;
+		if (finished || (event.key === '~' && event.ctrlKey)) return;
 		inputer.processKeyEvent(event);
 
 		caret.processCaret(inputer.words, inputer.currentWordIndex, inputer.currentCharIndex);
@@ -78,8 +78,7 @@
 </div>
 
 {#if debug}
-	<div style="width: 100vw;">
-		<h1>Debug Info</h1>
+	<div class="debug">
 		<pre>{JSON.stringify(
 				words.map((x) => {
 					return {
@@ -99,6 +98,38 @@
 {/if}
 
 <style>
+	.debug {
+		position: absolute;
+		top: 0;
+		left: 0;
+
+		height: 100%;
+		width: 100%;
+		box-sizing: border-box;
+
+		overflow-y: scroll;
+
+		border: 1px solid var(--fg-color);
+		border-radius: 5px;
+	}
+	.debug > pre {
+        margin: 0;
+	}
+
+	.debug::-webkit-scrollbar {
+		width: 5px;
+	}
+	.debug::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.debug::-webkit-scrollbar-thumb {
+		background: #888;
+		border-radius: 10px;
+	}
+	.debug::-webkit-scrollbar-thumb:hover {
+		background: #555;
+	}
+
 	.words-container {
 		font-size: 2em;
 		max-width: 800px;
