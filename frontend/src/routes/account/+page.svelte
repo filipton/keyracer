@@ -17,7 +17,7 @@
 			type: 'standard',
 			size: 'large',
 			theme: 'outline',
-			width: 250
+			width: 200
 		});
 
 		//@ts-ignore
@@ -39,26 +39,19 @@
 				.then((x) => alert(x));
 		}
 	}
-
-	function toggle() {
-		showLoginScreen = !showLoginScreen;
-	}
 </script>
 
 <div class="container">
-	<button on:click={() => toggle()} class="btn"> Login </button>
-</div>
-
-<div class="googleSignIn" style={showLoginScreen ? '' : 'display: none'}>
-	<div bind:this={googleButton} />
+	<div class="googleSignIn">
+		<div bind:this={googleButton} />
+	</div>
 </div>
 
 <style>
 	.googleSignIn {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
+		position: relative;
+		top: 0;
+		left: 0;
 
 		display: flex;
 		justify-content: center;

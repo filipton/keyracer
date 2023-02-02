@@ -113,7 +113,7 @@
 		border-radius: 5px;
 	}
 	.debug > pre {
-        margin: 0;
+		margin: 0;
 	}
 
 	.debug::-webkit-scrollbar {
@@ -134,10 +134,14 @@
 		font-size: 2em;
 		max-width: 800px;
 
+		padding-left: 1em;
+		padding-right: 1em;
+
 		-webkit-user-select: none; /* Safari */
 		-ms-user-select: none; /* IE 10 and IE 11 */
 		user-select: none; /* Standard syntax */
 	}
+
 
 	.incorrect-word > letter {
 		animation: border-bottom 0.5s;

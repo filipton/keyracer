@@ -1,4 +1,4 @@
-export const apiUrl = "https://kr.filipton.space";
+export const apiUrl = "http://localhost:8080/api";
 
 export enum CharState {
     NotStarted,
@@ -44,3 +44,4 @@ export type HistoryEntry = {
     input: string;
     time: number;
 };
+
