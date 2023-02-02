@@ -2,6 +2,9 @@
 	import { CharState, type KeyracerFinishDetails } from '$lib/types';
 	import { onMount } from 'svelte';
 
+	import { Line } from 'svelte-chartjs';
+	import 'chart.js/auto';
+
 	export let details: KeyracerFinishDetails;
 
 	let wpm: number = 0;
@@ -9,8 +12,13 @@
 	let time: string = '0.00s';
 	let accuracy: string = '0%';
 
+	let data: any;
+
 	onMount(() => {
-		if (details) calculate();
+		if (!details) return;
+
+		calculate();
+		calculate_chart();
 	});
 
 	function calculate() {
@@ -28,6 +36,26 @@
 		rawWpm = Math.round(raw_chars / 5 / (details.time / 60000));
 		rawWpm = Math.max(rawWpm, wpm);
 		accuracy = `${Math.round((details.charsCorrect / details.charsWritten) * 100)}%`;
+	}
+
+	function calculate_chart() {
+		let datas = details.history.map((x, i) => {
+			let _time = x.time - (details.history[i - 1]?.time ?? 0);
+			return _time / 1000;
+		});
+
+		data = {
+			labels: details.history.map((_, i) => i),
+			datasets: [
+				{
+					label: 'Keystroke Time (s)',
+					fill: true,
+					lineTension: 0.5,
+					borderColor: window.getComputedStyle(document.body).getPropertyValue('--fg-color'),
+					data: datas
+				}
+			]
+		};
 	}
 </script>
 
@@ -50,12 +78,23 @@
 	</div>
 </div>
 
+{#if data}
+	<div class="charts-holder">
+		<Line {data} width={100} />
+	</div>
+{/if}
+
 <style>
 	.infos-holder {
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		gap: 1em;
+	}
+
+	.charts-holder {
+		margin-top: 3em;
+		width: 100%;
 	}
 
 	.infos-holder > .info-box {

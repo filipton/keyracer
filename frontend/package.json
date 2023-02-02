@@ -29,6 +29,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@types/google-one-tap": "^1.2.2"
+		"@types/google-one-tap": "^1.2.2",
+		"chart.js": "^4.2.0",
+		"svelte-chartjs": "^3.1.2"
 	}
 }
