@@ -61,5 +61,6 @@ pub struct NrResult {
     pub time: i32,
     pub wpm: f64,
     pub acc: f64,
+    pub max_ks: i32,
     pub created_at: i64
 }

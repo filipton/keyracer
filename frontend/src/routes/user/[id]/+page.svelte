@@ -28,13 +28,22 @@
 					label: 'WPM',
 					lineTension: 0.5,
 					borderColor: 'rgb(75, 192, 192)',
-					data: userResults.map((x) => x.wpm)
+					data: userResults.map((x) => x.wpm),
+                    yAxisID: 'y'
 				},
 				{
-					label: 'ACCURACY',
+					label: 'ACCURACY (%)',
 					lineTension: 0.5,
 					borderColor: 'rgb(192, 75, 192)',
-					data: userResults.map((x) => x.acc)
+					data: userResults.map((x) => x.acc),
+                    yAxisID: 'y'
+				},
+				{
+					label: 'MAX KEYSTROKE TIME (ms)',
+					lineTension: 0.5,
+					borderColor: 'rgb(192, 192, 75)',
+					data: userResults.map((x) => x.max_ks),
+                    yAxisID: 'y2'
 				}
 			]
 		};
@@ -55,7 +64,24 @@
 {#if chartData}
 	<h1 style="text-align: center">Last 50 results:</h1>
 	<div class="charts-holder">
-		<Line data={chartData} width={100} />
+		<Line
+			options={{
+				scales: {
+					y: {
+						beginAtZero: true,
+						display: true,
+						position: 'left'
+					},
+					y2: {
+						beginAtZero: true,
+						display: true,
+						position: 'right'
+					}
+				}
+			}}
+			data={chartData}
+			width={100}
+		/>
 	</div>
 {:else}
 	<div class="no-data">

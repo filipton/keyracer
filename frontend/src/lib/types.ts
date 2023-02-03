@@ -58,5 +58,6 @@ export type NrResult = {
     time: number;
     wpm: number;
     acc: number;
+    max_ks: number;
     created_at: bigint;
 };

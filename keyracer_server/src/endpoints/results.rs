@@ -39,6 +39,15 @@ pub async fn keyracer_response(
             .collect(),
     };
 
+    let mut max_ks_time = -1;
+    for i in 1.._data.history.len() {
+        let ks_time = _data.history[i].time - _data.history[i - 1].time;
+
+        if ks_time > max_ks_time {
+            max_ks_time = ks_time;
+        }
+    }
+
     let wpm_time = response_data.time as f64 / 60000f64;
     let wpm = response_data.chars_in_correct_words as f64 / 5f64 / wpm_time;
 
@@ -47,12 +56,13 @@ pub async fn keyracer_response(
     let accuracy = response_data.chars_correct as f64 / response_data.chars_written as f64 * 100f64;
 
     let insert_query = sqlx::query(
-        "INSERT INTO nr_results(user_id, time, wpm, acc) VALUES ($1, $2, $3, $4) RETURNING id",
+        "INSERT INTO nr_results(user_id, time, wpm, acc, max_ks) VALUES ($1, $2, $3, $4, $5) RETURNING id",
     )
     .bind(user.id)
     .bind(time)
     .bind(wpm)
     .bind(accuracy)
+    .bind(max_ks_time)
     .fetch_one(&data.pool)
     .await;
 
