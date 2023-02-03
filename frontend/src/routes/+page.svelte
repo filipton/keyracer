@@ -44,12 +44,12 @@
 
 	async function getWordsList(quote: boolean = false): Promise<string> {
 		if (!quote) {
-			const response = await fetch(`${apiUrl}/words/15`);
+			const response = await fetch(`${apiUrl}/test/words/15`);
 			const words = await response.json();
 			return words.join(' ');
 		}
 
-		const response = await fetch(`${apiUrl}/quote`);
+		const response = await fetch(`${apiUrl}/test/quote`);
 		const qresp: QuoteJson = await response.json();
 		return qresp.quote;
 	}

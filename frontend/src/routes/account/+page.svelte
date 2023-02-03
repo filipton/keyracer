@@ -58,6 +58,15 @@
 	<div class="googleSignIn" style={user ? 'display: none;' : ''}>
 		<div bind:this={googleButton} />
 	</div>
+
+	{#if user}
+		<h1>Hello {user.name}</h1>
+		<span>Here's your profile</span>
+		<span>id: {user.id}</span>
+		<span>created at: {new Date(Number(user.created_at) * 1000).toLocaleString()}</span>
+	{:else}
+		<span>Sign in to access your profile</span>
+	{/if}
 </div>
 
 <style>
