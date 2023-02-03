@@ -52,7 +52,8 @@
 
 <div class="content">
 	<h1>{userInfo.name}'s stats</h1>
-	<h2>Account created: {new Date(Number(userInfo.created_at) * 1000).toLocaleString()}</h2>
+	<span>Account created: {new Date(Number(userInfo.created_at) * 1000).toLocaleString()}</span>
+    <br />
 
 	{#if userInfo.email !== 'REDACTED'}
 		<button class="show-email-btn" on:click={() => alert(userInfo.email)}
