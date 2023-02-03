@@ -20,7 +20,7 @@ export const load = (async ({ fetch, cookies }) => {
                 };
             })
             .catch(() => {
-                cookies.delete("token");
+                console.log("Eror while trying to get session");
             });
     }
 }) satisfies LayoutServerLoad;
