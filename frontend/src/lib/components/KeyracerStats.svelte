@@ -49,7 +49,6 @@
 			datasets: [
 				{
 					label: 'Keystroke Time (s)',
-					fill: true,
 					lineTension: 0.5,
 					borderColor: window.getComputedStyle(document.body).getPropertyValue('--fg-color'),
 					data: datas

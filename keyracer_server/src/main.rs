@@ -59,6 +59,7 @@ async fn main() -> std::io::Result<()> {
         }
         .service(
             web::scope("/api/auth")
+                .service(endpoints::auth::get_user_info)
                 .service(endpoints::auth::google_auth)
                 .service(endpoints::auth::auth_session),
         )

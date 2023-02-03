@@ -1,4 +1,4 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use jsonwebtoken::{Algorithm, Validation};
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
@@ -95,4 +95,26 @@ pub async fn auth_session(
     .unwrap();
 
     return HttpResponse::Ok().json(user_info);
+}
+
+// this should be /users/{id}
+#[get("/{user_id}")]
+pub async fn get_user_info(data: web::Data<AppState>, path: web::Path<i64>) -> impl Responder {
+    let user_id = path.into_inner();
+
+    let user_info: Result<User, sqlx::Error> = sqlx::query_as(
+        "SELECT id, email, name, created_at FROM users 
+         WHERE users.id = $1",
+    )
+    .bind(user_id)
+    .fetch_one(&data.pool)
+    .await;
+
+    return match user_info {
+        Ok(mut user) => {
+            user.email = "REDACTED".to_string();
+            HttpResponse::Ok().json(user)
+        }
+        Err(_) => HttpResponse::NotFound().finish(),
+    };
 }

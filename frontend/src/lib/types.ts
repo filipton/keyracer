@@ -50,4 +50,13 @@ export type User = {
     name: string;
     email: string;
     created_at: bigint;
-}
+};
+
+export type NrResult = {
+    id: number;
+    user_id: number;
+    time: number;
+    wpm: number;
+    acc: number;
+    created_at: bigint;
+};
