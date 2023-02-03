@@ -47,7 +47,7 @@ pub async fn test() -> impl Responder {
 
 #[post("/response")]
 pub async fn post_keyracer_response(response_data: web::Json<KeyracerResponse>) -> impl Responder {
-    let data: KeyracerData = KeyracerData {
+    let _data: KeyracerData = KeyracerData {
         time: response_data.time,
         chars_written: response_data.chars_written,
         chars_correct: response_data.chars_correct,

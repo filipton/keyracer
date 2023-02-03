@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { apiUrl } from '$lib/types';
+	import { page } from '$app/stores';
+	import { apiUrl, type User } from '$lib/types';
 	import { onMount } from 'svelte';
 
-	let showLoginScreen: boolean = false;
+	let user: User = $page.data.user;
 	let googleButton: HTMLElement;
 
 	onMount(() => {
+		if (user) return;
+
 		//@ts-ignore
 		google.accounts.id.initialize({
 			client_id: '1038308532058-lamiirk7j3jko2uc5qhf7clq4e1f1ahp.apps.googleusercontent.com',
@@ -35,24 +38,30 @@
 				},
 				body: JSON.stringify(credential)
 			})
-				.then((res) => res.text())
-				.then((x) => alert(x));
+				.then((res) => res.json())
+				.then((x) => {
+					setCookie('token', x, 365);
+					location.reload();
+				});
 		}
+	}
+
+	function setCookie(cname: string, cvalue: string, exdays: number) {
+		const d = new Date();
+		d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+		let expires = 'expires=' + d.toUTCString();
+		document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
 	}
 </script>
 
 <div class="container">
-	<div class="googleSignIn">
+	<div class="googleSignIn" style={user ? 'display: none;' : ''}>
 		<div bind:this={googleButton} />
 	</div>
 </div>
 
 <style>
 	.googleSignIn {
-		position: relative;
-		top: 0;
-		left: 0;
-
 		display: flex;
 		justify-content: center;
 		align-items: center;

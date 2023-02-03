@@ -1,6 +1,6 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpResponse, Responder};
 use jsonwebtoken::{Algorithm, Validation};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use std::str;
 
@@ -17,6 +17,14 @@ pub struct JwtHeader {
     pub alg: String,
     pub kid: String,
     pub typ: String,
+}
+
+#[derive(Serialize, sqlx::FromRow)]
+pub struct User {
+    pub id: i64,
+    pub name: String,
+    pub email: String,
+    pub created_at: i64,
 }
 
 #[post("")]
@@ -58,5 +66,33 @@ pub async fn google_auth(data: web::Data<AppState>, token: web::Json<String>) ->
         }
     };
 
-    return HttpResponse::Ok().body(format!("{:?}", user_id));
+    let session_id = uuid::Uuid::new_v4().to_string();
+    let _ = sqlx::query("INSERT INTO sessions (token, user_id) VALUES ($1, $2)")
+        .bind(session_id.clone())
+        .bind(user_id)
+        .execute(&data.pool)
+        .await
+        .unwrap();
+
+    return HttpResponse::Ok().json(session_id);
+}
+
+#[post("/session")]
+pub async fn auth_session(
+    data: web::Data<AppState>,
+    session_id: web::Json<String>,
+) -> impl Responder {
+    let session_id = session_id.into_inner();
+
+    let user_info: User = sqlx::query_as(
+        "SELECT id, name, email, created_at FROM users 
+         INNER JOIN sessions ON users.id = sessions.user_id 
+         WHERE sessions.token = $1",
+    )
+    .bind(session_id)
+    .fetch_one(&data.pool)
+    .await
+    .unwrap();
+
+    return HttpResponse::Ok().json(user_info);
 }

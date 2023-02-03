@@ -1,4 +1,4 @@
-export const apiUrl = "http://localhost:8080/api";
+export const apiUrl = "http://127.0.0.1:8080/api";
 
 export enum CharState {
     NotStarted,
@@ -45,3 +45,9 @@ export type HistoryEntry = {
     time: number;
 };
 
+export type User = {
+    id: number;
+    name: string;
+    email: string;
+    created_at: bigint;
+}

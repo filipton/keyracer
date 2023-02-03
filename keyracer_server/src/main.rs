@@ -57,7 +57,11 @@ async fn main() -> std::io::Result<()> {
                 .wrap(cors)
                 .app_data(web::Data::new(app_state.clone()))
         }
-        .service(web::scope("/api/auth").service(endpoints::auth::google_auth))
+        .service(
+            web::scope("/api/auth")
+                .service(endpoints::auth::google_auth)
+                .service(endpoints::auth::auth_session),
+        )
         .service(
             web::scope("/api/test")
                 .service(endpoints::test::get_index)
