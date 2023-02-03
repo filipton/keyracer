@@ -15,7 +15,8 @@ export const load = (async ({ fetch, cookies }) => {
             .then((res) => res.json())
             .then((x: User) => {
                 return {
-                    user: x
+                    user: x,
+                    token: session_token
                 };
             })
             .catch(() => {

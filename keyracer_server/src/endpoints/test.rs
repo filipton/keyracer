@@ -44,38 +44,3 @@ pub async fn test() -> impl Responder {
     return HttpResponse::Ok()
         .body(std::fs::read_to_string("/home/notpilif/Downloads/test.html").unwrap());
 }
-
-#[post("/response")]
-pub async fn post_keyracer_response(response_data: web::Json<KeyracerResponse>) -> impl Responder {
-    let _data: KeyracerData = KeyracerData {
-        time: response_data.time,
-        chars_written: response_data.chars_written,
-        chars_correct: response_data.chars_correct,
-        chars_in_correct_words: response_data.chars_in_correct_words,
-        history: response_data
-            .history
-            .lines()
-            .map(|x| {
-                let splitted: Vec<&str> = x.split("><").collect();
-
-                return HistoryEntry {
-                    time: splitted[0].to_string().parse().unwrap(),
-                    input: splitted[1].to_string(),
-                };
-            })
-            .collect(),
-    };
-
-    let wpm_time = response_data.time as f64 / 60000f64;
-    let wpm = response_data.chars_in_correct_words as f64 / 5f64 / wpm_time;
-
-    let time = format!("{:.2}s", response_data.time as f64 / 10f64 / 100f64);
-    let accuracy = format!(
-        "{:.2}%",
-        response_data.chars_correct as f64 / response_data.chars_written as f64 * 100f64
-    );
-
-    println!("WPM: {:.2}  TIME: {}  ACC: {}", wpm, time, accuracy);
-
-    return HttpResponse::Ok().body("");
-}

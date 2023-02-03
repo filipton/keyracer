@@ -9,7 +9,7 @@ pub struct QouteEntry {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct KeyracerResponse {
-    pub time: i64,
+    pub time: i32,
     pub chars_written: i32,
     pub chars_correct: i32,
     pub chars_in_correct_words: i32,
@@ -18,7 +18,7 @@ pub struct KeyracerResponse {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct KeyracerData {
-    pub time: i64,
+    pub time: i32,
     pub chars_written: i32,
     pub chars_correct: i32,
     pub chars_in_correct_words: i32,
@@ -52,4 +52,14 @@ pub struct GoogleCert {
     pub kid: String,
     pub kty: String,
     pub n: String,
+}
+
+#[derive(Serialize, Debug, sqlx::FromRow)]
+pub struct NrResult {
+    pub id: i32,
+    pub user_id: i64,
+    pub time: i32,
+    pub wpm: f64,
+    pub acc: f64,
+    pub created_at: i64
 }

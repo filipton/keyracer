@@ -63,12 +63,16 @@ async fn main() -> std::io::Result<()> {
                 .service(endpoints::auth::auth_session),
         )
         .service(
+            web::scope("/api/results")
+                .service(endpoints::results::keyracer_response)
+                .service(endpoints::results::get_user_results),
+        )
+        .service(
             web::scope("/api/test")
                 .service(endpoints::test::get_index)
                 .service(endpoints::test::get_test)
                 .service(endpoints::test::test)
-                .service(endpoints::test::get_quotes_entry)
-                .service(endpoints::test::post_keyracer_response),
+                .service(endpoints::test::get_quotes_entry),
         )
     })
     .bind(("0.0.0.0", port))?

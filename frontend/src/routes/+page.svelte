@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import KeyracerInput from '$lib/components/KeyracerInput.svelte';
 	import KeyracerStats from '$lib/components/KeyracerStats.svelte';
 	import {
@@ -29,10 +30,16 @@
 			history: keystrokesStr
 		};
 
-		await fetch(`${apiUrl}/response`, {
+		if (!$page.data.token) {
+			setTimeout(() => alert('Login to save your results!'), 1000);
+			return;
+		}
+
+		await fetch(`${apiUrl}/results`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				Auth: $page.data.token
 			},
 			body: JSON.stringify(data)
 		}).then(async (x: Response) => {
@@ -76,7 +83,7 @@
 	</div>
 {/if}
 
-<div class="main">
+<div class="container">
 	{#if finished}
 		<div class="main-screen">
 			<h2>STATS</h2>
@@ -98,29 +105,14 @@
 </div>
 
 <style>
-	.main {
+	.container {
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		flex-wrap: wrap;
 
-		height: calc(100vh - 59px);
-
-		margin-left: auto;
-		margin-right: auto;
-		max-width: 960px;
-
-		animation: fadeIn 1.5s;
-		animation-fill-mode: forwards;
-		opacity: 0;
-	}
-	@keyframes fadeIn {
-		0% {
-			opacity: 0;
-		}
-		100% {
-			opacity: 1;
-		}
+		width: 100%;
+		height: 100%;
 	}
 
 	.main-screen {

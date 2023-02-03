@@ -134,9 +134,6 @@
 		font-size: 2em;
 		max-width: 800px;
 
-		padding-left: 1em;
-		padding-right: 1em;
-
 		-webkit-user-select: none; /* Safari */
 		-ms-user-select: none; /* IE 10 and IE 11 */
 		user-select: none; /* Standard syntax */

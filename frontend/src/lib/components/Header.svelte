@@ -1,9 +1,9 @@
 <div class="header">
-    <div style="width: 1.5rem; height: 1.5rem;" />
+	<div style="width: 1.5rem; height: 1.5rem;" />
 
 	<a href="/" class="logo">KEYRACER</a>
 
-	<a href="/account">
+	<a href="/user">
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			fill="none"
@@ -26,10 +26,10 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-        max-width: 960px;
+		max-width: 960px;
 		padding: 15px;
 
-        margin: 0 auto;
+		margin: 0 auto;
 	}
 
 	.header > a {

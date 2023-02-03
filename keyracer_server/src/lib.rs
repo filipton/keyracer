@@ -7,6 +7,7 @@ pub mod utils;
 
 pub mod endpoints {
     pub mod auth;
+    pub mod results;
     pub mod test;
 }
 
