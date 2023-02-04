@@ -61,3 +61,19 @@ export type NrResult = {
     max_ks: number;
     created_at: bigint;
 };
+
+
+export type RankedQuote = {
+    id: number;
+    start_at: bigint;
+    quote: string;
+};
+
+export type RankedResponse = {
+    time: number;
+    quote_id: number;
+    chars_written: number;
+    chars_correct: number;
+    chars_in_correct_words: number;
+    history: string;
+};

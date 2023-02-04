@@ -11,6 +11,8 @@ actix-web = "4.3.0"
 anyhow = "1.0.68"
 awc = { version = "3.1.0", features = ["rustls"] }
 base64 = "0.21.0"
+brotli = "3.3.4"
+deflate = "1.0.0"
 dotenv = "0.15.0"
 idgenerator = "2.0.0"
 jsonwebtoken = "8.2.0"

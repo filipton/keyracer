@@ -1,19 +1,19 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use rand::Rng;
 
-use crate::{
-    structs::{HistoryEntry, KeyracerData, KeyracerResponse},
-    AppState,
-};
+use std::io::Write;
+
+use crate::AppState;
 
 #[get("")]
 pub async fn get_index(data: web::Data<AppState>) -> impl Responder {
-    let row: (String,) = sqlx::query_as("SELECT 'Hello, world!'")
-        .fetch_one(&data.pool)
-        .await
-        .unwrap();
+    let input = vec![123, 56, 123];
 
-    return HttpResponse::Ok().body(format!("{:?}", row));
+    let mut writer = brotli::CompressorWriter::new(Vec::new(), 4096, 11, 22);
+    writer.write_all(&input).unwrap();
+    let output: Vec<u8> = writer.into_inner();
+
+    return HttpResponse::Ok().body(format!("{:?}", base64::encode(output)));
 }
 
 #[get("/words/{count}")]

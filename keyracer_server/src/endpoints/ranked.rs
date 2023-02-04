@@ -1,11 +1,9 @@
-use crate::{
-    endpoints::auth::User,
-    structs::{HistoryEntry, KeyracerData, KeyracerResponse, RankedResponse},
-    utils::verify_token,
-    AppState,
-};
+use crate::{endpoints::auth::User, structs::RankedResponse, utils::verify_token, AppState};
+
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use base64::{engine::general_purpose, Engine as _};
 use serde::Serialize;
+use std::io::Write;
 
 #[derive(sqlx::FromRow, Serialize)]
 pub struct RankedQuote {
@@ -56,6 +54,12 @@ pub async fn ranked_response(
 
     let accuracy = response_data.chars_correct as f64 / response_data.chars_written as f64 * 100f64;
 
+    let input = response_data.history.as_bytes();
+    let mut writer = brotli::CompressorWriter::new(Vec::new(), 4096, 11, 22);
+    writer.write_all(&input).unwrap();
+
+    let compressed_history = general_purpose::STANDARD.encode(writer.into_inner());
+
     let insert_query = sqlx::query(
         "UPDATE r_results SET time = $1, wpm = $2, acc = $3, ks_history = $4, 
          submitted_at = extract(epoch from now())
@@ -64,7 +68,7 @@ pub async fn ranked_response(
     .bind(response_data.time)
     .bind(wpm)
     .bind(accuracy)
-    .bind(response_data.history.clone())
+    .bind(compressed_history)
     .bind(user.id)
     .bind(response_data.quote_id)
     .execute(&data.pool)
