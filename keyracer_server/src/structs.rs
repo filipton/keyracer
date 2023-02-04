@@ -17,6 +17,16 @@ pub struct KeyracerResponse {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct RankedResponse {
+    pub time: i32,
+    pub quote_id: i32,
+    pub chars_written: i32,
+    pub chars_correct: i32,
+    pub chars_in_correct_words: i32,
+    pub history: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct KeyracerData {
     pub time: i32,
     pub chars_written: i32,
@@ -62,5 +72,5 @@ pub struct NrResult {
     pub wpm: f64,
     pub acc: f64,
     pub max_ks: i32,
-    pub created_at: i64
+    pub created_at: i64,
 }

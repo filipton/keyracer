@@ -1,6 +1,6 @@
 use crate::{
     endpoints::auth::User,
-    structs::{HistoryEntry, KeyracerData, KeyracerResponse},
+    structs::{HistoryEntry, KeyracerData, KeyracerResponse, RankedResponse},
     utils::verify_token,
     AppState,
 };
@@ -41,9 +41,9 @@ pub async fn get_ranked_quote(data: web::Data<AppState>, req: HttpRequest) -> im
 }
 
 #[post("")]
-pub async fn keyracer_response(
+pub async fn ranked_response(
     data: web::Data<AppState>,
-    response_data: web::Json<KeyracerResponse>,
+    response_data: web::Json<RankedResponse>,
     req: HttpRequest,
 ) -> impl Responder {
     let user: User = match verify_token(&req, &data.pool).await {
@@ -51,56 +51,32 @@ pub async fn keyracer_response(
         None => return HttpResponse::Unauthorized().finish(),
     };
 
-    // this _data is useless for now, but it will be used in the future when I will add ranking
-    // system
-    let _data: KeyracerData = KeyracerData {
-        time: response_data.time,
-        chars_written: response_data.chars_written,
-        chars_correct: response_data.chars_correct,
-        chars_in_correct_words: response_data.chars_in_correct_words,
-        history: response_data
-            .history
-            .lines()
-            .map(|x| {
-                let splitted: Vec<&str> = x.split("><").collect();
-
-                return HistoryEntry {
-                    time: splitted[0].to_string().parse().unwrap(),
-                    input: splitted[1].to_string(),
-                };
-            })
-            .collect(),
-    };
-
-    let mut max_ks_time = -1;
-    for i in 1.._data.history.len() {
-        let ks_time = _data.history[i].time - _data.history[i - 1].time;
-
-        if ks_time > max_ks_time {
-            max_ks_time = ks_time;
-        }
-    }
-
     let wpm_time = response_data.time as f64 / 60000f64;
     let wpm = response_data.chars_in_correct_words as f64 / 5f64 / wpm_time;
-
-    let time = response_data.time;
 
     let accuracy = response_data.chars_correct as f64 / response_data.chars_written as f64 * 100f64;
 
     let insert_query = sqlx::query(
-        "INSERT INTO nr_results(user_id, time, wpm, acc, max_ks) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+        "UPDATE r_results SET time = $1, wpm = $2, acc = $3, ks_history = $4, 
+         submitted_at = extract(epoch from now())
+         WHERE submitted_at IS NULL AND user_id = $5 AND quote_id = $6",
     )
-    .bind(user.id)
-    .bind(time)
+    .bind(response_data.time)
     .bind(wpm)
     .bind(accuracy)
-    .bind(max_ks_time)
-    .fetch_one(&data.pool)
+    .bind(response_data.history.clone())
+    .bind(user.id)
+    .bind(response_data.quote_id)
+    .execute(&data.pool)
     .await;
 
     return match insert_query {
-        Ok(_) => HttpResponse::Ok().finish(),
+        Ok(affected) => {
+            if affected.rows_affected() == 0 {
+                return HttpResponse::InternalServerError().finish();
+            }
+            return HttpResponse::Ok().finish();
+        }
         Err(_) => HttpResponse::InternalServerError().finish(),
     };
 }
