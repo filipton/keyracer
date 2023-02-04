@@ -8,17 +8,26 @@
 		type RankedQuote,
 		type RankedResponse
 	} from '$lib/types';
+	import { onMount } from 'svelte';
 
+	$: rankedAvailable = $page.data.rankedAvailable as boolean;
 	let rankedQuote: string;
 	let rankedQuoteId: number = -1;
 
 	let errorMessage: string = ' ';
 	let errorTimeout: NodeJS.Timeout;
 
-	function setError(msg: string) {
+	onMount(() => {
+		if (!rankedAvailable) {
+			setError("You can't play ranked right now.", true);
+		}
+	});
+
+	function setError(msg: string, forever: boolean = false) {
 		clearTimeout(errorTimeout);
 		errorMessage = msg;
 
+		if (forever) return;
 		errorTimeout = setTimeout(() => {
 			errorMessage = '';
 		}, 5000);
@@ -30,8 +39,8 @@
 			return;
 		}
 
-		const res = await fetch(`${apiUrl}/ranked`, {
-			method: 'GET',
+		const res = await fetch(`${apiUrl}/ranked/start`, {
+			method: 'POST',
 			headers: {
 				Auth: $page.data.token
 			}
@@ -66,7 +75,7 @@
 			history: keystrokesStr
 		};
 
-		await fetch(`${apiUrl}/ranked`, {
+		await fetch(`${apiUrl}/ranked/submit`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -102,7 +111,9 @@
 		<div style="margin-top: 3em; text-align: center;">
 			<div class="error">{errorMessage}</div>
 
-			<button on:click={Participate} class="btn">PARTICIPATE</button>
+			<button on:click={Participate} class="btn {rankedAvailable ? '' : 'disabled'}"
+				>PARTICIPATE</button
+			>
 		</div>
 	{/if}
 </div>
@@ -116,6 +127,11 @@
 
 		width: 100%;
 		height: 100%;
+	}
+
+	.disabled {
+		opacity: 0.5;
+		pointer-events: none;
 	}
 
 	.main-screen {

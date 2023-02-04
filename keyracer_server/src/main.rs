@@ -70,7 +70,8 @@ async fn main() -> std::io::Result<()> {
         )
         .service(
             web::scope("/api/ranked")
-                .service(endpoints::ranked::get_ranked_quote)
+                .service(endpoints::ranked::get_ranked_avail)
+                .service(endpoints::ranked::start_ranked_quote)
                 .service(endpoints::ranked::ranked_response),
         )
         .service(

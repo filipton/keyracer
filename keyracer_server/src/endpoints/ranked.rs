@@ -13,7 +13,29 @@ pub struct RankedQuote {
 }
 
 #[get("")]
-pub async fn get_ranked_quote(data: web::Data<AppState>, req: HttpRequest) -> impl Responder {
+pub async fn get_ranked_avail(data: web::Data<AppState>, req: HttpRequest) -> impl Responder {
+    let user: User = match verify_token(&req, &data.pool).await {
+        Some(user) => user,
+        None => return HttpResponse::Unauthorized().finish(),
+    };
+
+    let latest_ranked =
+        sqlx::query("
+                    SELECT id FROM r_results WHERE user_id = $1 AND 
+                    quote_id = (SELECT id FROM ranked_quotes WHERE start_at < extract(epoch from now()) 
+                    ORDER BY start_at DESC LIMIT 1)")
+            .bind(user.id)
+            .fetch_one(&data.pool)
+            .await;
+
+    return match latest_ranked {
+        Ok(_) => HttpResponse::Forbidden().body("No events for you!"),
+        Err(_) => HttpResponse::Ok().finish(),
+    };
+}
+
+#[post("/start")]
+pub async fn start_ranked_quote(data: web::Data<AppState>, req: HttpRequest) -> impl Responder {
     let user: User = match verify_token(&req, &data.pool).await {
         Some(user) => user,
         None => return HttpResponse::Unauthorized().finish(),
@@ -38,7 +60,7 @@ pub async fn get_ranked_quote(data: web::Data<AppState>, req: HttpRequest) -> im
     };
 }
 
-#[post("")]
+#[post("/submit")]
 pub async fn ranked_response(
     data: web::Data<AppState>,
     response_data: web::Json<RankedResponse>,
