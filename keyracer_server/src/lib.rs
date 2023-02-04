@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use jsonwebtoken::DecodingKey;
+use std::collections::HashMap;
 use structs::QouteEntry;
 
 pub mod structs;
@@ -7,6 +7,7 @@ pub mod utils;
 
 pub mod endpoints {
     pub mod auth;
+    pub mod ranked;
     pub mod results;
     pub mod test;
 }
