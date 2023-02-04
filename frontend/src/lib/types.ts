@@ -77,3 +77,12 @@ export type RankedResponse = {
     chars_in_correct_words: number;
     history: string;
 };
+
+export type RankingEntry = {
+    id: number;
+    name: string;
+    time: number;
+    wpm: number;
+    acc: number;
+    submitted_at: bigint;
+};

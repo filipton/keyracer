@@ -6,7 +6,8 @@
 		apiUrl,
 		type KeyracerFinishDetails,
 		type RankedQuote,
-		type RankedResponse
+		type RankedResponse,
+		type RankingEntry
 	} from '$lib/types';
 	import { onMount } from 'svelte';
 
@@ -14,24 +15,21 @@
 	let rankedQuote: string;
 	let rankedQuoteId: number = -1;
 
+	let ranking: RankingEntry[];
+
+	let finishedDetails: KeyracerFinishDetails;
+	let finished: boolean = false;
+
 	let errorMessage: string = ' ';
 	let errorTimeout: NodeJS.Timeout;
 
-	onMount(() => {
+	onMount(async () => {
+		await fetchRanking();
+
 		if (!rankedAvailable) {
 			setError("You can't play ranked right now.", true);
 		}
 	});
-
-	function setError(msg: string, forever: boolean = false) {
-		clearTimeout(errorTimeout);
-		errorMessage = msg;
-
-		if (forever) return;
-		errorTimeout = setTimeout(() => {
-			errorMessage = '';
-		}, 5000);
-	}
 
 	async function Participate() {
 		if (!$page.data.user) {
@@ -55,9 +53,6 @@
 			setError('Something went wrong.');
 		}
 	}
-
-	let finishedDetails: KeyracerFinishDetails;
-	let finished: boolean = false;
 
 	async function finishWriting(args: any) {
 		finishedDetails = args.detail;
@@ -88,6 +83,24 @@
 			}
 		});
 	}
+
+	async function fetchRanking() {
+		await fetch(`${apiUrl}/ranked/ranking`)
+			.then((x: Response) => x.json())
+			.then((x: RankingEntry[]) => {
+				ranking = x;
+			});
+	}
+
+	function setError(msg: string, forever: boolean = false) {
+		clearTimeout(errorTimeout);
+		errorMessage = msg;
+
+		if (forever) return;
+		errorTimeout = setTimeout(() => {
+			errorMessage = '';
+		}, 5000);
+	}
 </script>
 
 <div class="container">
@@ -115,6 +128,26 @@
 				>PARTICIPATE</button
 			>
 		</div>
+	{/if}
+
+	{#if ranking && !rankedQuote}
+		<h1>Ranking</h1>
+
+		<table>
+			<tr>
+				<th>#</th>
+				<th>Name</th>
+				<th>WPM</th>
+			</tr>
+
+			{#each ranking as entry, i}
+				<tr>
+					<td>{i + 1}</td>
+					<td>{entry.name}</td>
+					<td>{entry.wpm.toPrecision(4)}</td>
+				</tr>
+			{/each}
+		</table>
 	{/if}
 </div>
 
@@ -152,5 +185,17 @@
 	}
 	.h2 {
 		font-size: 1.5rem;
+	}
+
+	table {
+		border-collapse: collapse;
+	}
+
+	th,
+	td {
+		padding-left: 0.5em;
+		padding-right: 0.5em;
+
+		border: 1px solid var(--fg-color);
 	}
 </style>

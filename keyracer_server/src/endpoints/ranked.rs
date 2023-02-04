@@ -12,6 +12,16 @@ pub struct RankedQuote {
     pub quote: String,
 }
 
+#[derive(sqlx::FromRow, Serialize)]
+pub struct RankingEntry {
+    pub id: i32,
+    pub name: String,
+    pub time: i32,
+    pub wpm: f64,
+    pub acc: f64,
+    pub submitted_at: i64,
+}
+
 #[get("")]
 pub async fn get_ranked_avail(data: web::Data<AppState>, req: HttpRequest) -> impl Responder {
     let user: User = match verify_token(&req, &data.pool).await {
@@ -104,5 +114,25 @@ pub async fn ranked_response(
             return HttpResponse::Ok().finish();
         }
         Err(_) => HttpResponse::InternalServerError().finish(),
+    };
+}
+
+#[get("/ranking")]
+pub async fn get_ranked_ranking(data: web::Data<AppState>) -> impl Responder {
+    let entries: Result<Vec<RankingEntry>, sqlx::Error> = sqlx::query_as(
+        "SELECT r_results.id, users.name, r_results.time, r_results.wpm, r_results.acc, r_results.submitted_at  
+         FROM r_results INNER JOIN users ON r_results.user_id = users.id 
+         WHERE quote_id = 
+            (SELECT id FROM ranked_quotes WHERE start_at < extract(epoch from now()) 
+             ORDER BY start_at DESC LIMIT 1)
+        ORDER BY wpm DESC",
+    )
+    .fetch_all(&data.pool)
+    .await;
+
+    return match entries {
+        Ok(entries) => HttpResponse::Ok().json(entries),
+        Err(_) => HttpResponse::InternalServerError().finish(),
+        //Err(err) => HttpResponse::InternalServerError().body(format!("{:?}", err)),
     };
 }
