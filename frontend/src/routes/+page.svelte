@@ -15,7 +15,7 @@
 
 	let selectedQuotes: boolean = false;
 	let selectedTheme: string = 'amoled';
-	let themes: string[] = ['amoled', 'dark', 'arch', 'light', 'azjat'];
+	let themes: string[] = ['amoled', 'dark', 'arch', 'light', 'matcha'];
 
 	let finishedDetails: KeyracerFinishDetails;
 
@@ -70,7 +70,7 @@
 	}
 
 	async function onKeyDown(event: KeyboardEvent) {
-		if (event.key === '~' && event.ctrlKey) {
+		if (event.key === 'Escape' && event.ctrlKey) {
 			event.preventDefault();
 			debug = !debug;
 		}
