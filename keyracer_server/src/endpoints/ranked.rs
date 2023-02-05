@@ -161,7 +161,10 @@ pub async fn get_ranked_history(
     .await;
 
     return match entries {
-        Ok(entries) => HttpResponse::Ok().json(entries),
+        Ok(mut entries) => {
+            entries[0].quote = "You cannot view this one yet!".to_string();
+            HttpResponse::Ok().json(entries)
+        }
         Err(_) => HttpResponse::InternalServerError().finish(),
     };
 }

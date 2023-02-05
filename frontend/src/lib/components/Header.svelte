@@ -42,7 +42,10 @@
 		justify-content: center;
 		align-items: center;
 		max-width: 960px;
-		padding: 15px;
+
+        padding-left: 1em;
+        padding-right: 1em;
+		height: 59px;
 
 		margin: 0 auto;
 	}

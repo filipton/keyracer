@@ -2,8 +2,8 @@
 	import Header from '$lib/components/Header.svelte';
 </script>
 
-<Header />
 <div class="main">
+	<Header />
 	<slot />
 </div>
 
@@ -15,11 +15,11 @@
 		padding-right: 1em;
 		max-width: 960px;
 
-		height: calc(100vh - 59px);
-
 		animation: fadeIn 1.5s;
 		animation-fill-mode: forwards;
 		opacity: 0;
+
+		height: calc(100% - 59px);
 	}
 	@keyframes fadeIn {
 		0% {

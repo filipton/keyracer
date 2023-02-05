@@ -31,11 +31,11 @@
 				`Next ranked game: ${new Date(rankedAvailable * 1000).toLocaleString('pl-PL')}`,
 				true
 			);
-        } else if (rankedAvailable === -1) {
-            setError('You\'ve already participated this day!', true);
+		} else if (rankedAvailable === -1) {
+			setError("You've already participated this day!", true);
 		} else if (rankedAvailable === -2) {
 			setError('Something went wrong!', true);
-        }
+		}
 
 		await fetchRankingHistory();
 	});
