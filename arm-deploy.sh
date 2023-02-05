@@ -2,7 +2,7 @@
 
 typesDir="./frontend/src/lib"
 typesFile="types.ts"
-apiUrl="https://kr.filipton.space/api"
+apiUrl="https://kr2.filipton.space/api"
 currDir="$(pwd)"
 
 cp "$typesDir/$typesFile" "$typesDir/$typesFile.old"

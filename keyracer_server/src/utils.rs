@@ -7,14 +7,8 @@ use std::collections::HashMap;
 pub async fn get_google_certs() -> Result<HashMap<String, DecodingKey>, ()> {
     let client = awc::Client::default();
 
-    let req = client.get("https://www.googleapis.com/oauth2/v3/certs");
-    let res = req
-        .send()
-        .await
-        .unwrap()
-        .json::<GoogleCerts>()
-        .await
-        .unwrap();
+    let res: GoogleCerts =
+        serde_json::from_str(std::fs::read_to_string("./certs.json").unwrap().as_str()).unwrap();
 
     let mut google_jwks: HashMap<String, DecodingKey> = HashMap::new();
     for key in res.keys {
