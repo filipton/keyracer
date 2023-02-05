@@ -17,6 +17,7 @@
 	let selectedTheme: string = 'amoled';
 	let themes: string[] = ['amoled', 'dark', 'arch', 'light', 'matcha'];
 
+	let restartButton: HTMLElement;
 	let finishedDetails: KeyracerFinishDetails;
 
 	onMount(() => {
@@ -70,9 +71,14 @@
 	}
 
 	async function onKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && event.ctrlKey) {
+		if (event.key === 'Escape' || (event.key === 'P' && event.ctrlKey)) {
 			event.preventDefault();
 			debug = !debug;
+		}
+
+		if (finished && event.key === 'Tab') {
+			event.preventDefault();
+			restartButton.focus();
 		}
 	}
 
@@ -130,9 +136,12 @@
 			<button
 				style="margin-top: auto; margin-bottom: 10px;"
 				class="btn"
+				bind:this={restartButton}
 				on:click={() => {
 					finished = false;
-				}}>RESTART</button
+				}}
+				><span class="btn-tooltip">ENTER</span>
+				RESTART</button
 			>
 		</div>
 	{:else}

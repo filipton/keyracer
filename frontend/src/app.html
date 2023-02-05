@@ -47,6 +47,41 @@
             font-size: 1em;
             margin: 4px 2px;
             cursor: pointer;
+
+            transition: scale 0.2s;
+        }
+        .btn:focus {
+            outline: none;
+            scale: 1.1;
+        }
+
+        .btn > .btn-tooltip {
+            position: absolute;
+            display: none;
+        }
+        .btn:focus > .btn-tooltip {
+            position: absolute;
+            display: block;
+
+            bottom: calc(100% + 3px);
+            background-color: var(--fg-color);
+            color: var(--bg-color);
+
+            width: 100%;
+            left: 0px;
+
+            padding-top: 3px;
+            padding-bottom: 3px; 
+        }
+        .btn:focus > .btn-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            border-width: 10px;
+            border-style: solid;
+            border-color: var(--fg-color) transparent transparent transparent;
         }
 
         html[data-theme="dark"] {

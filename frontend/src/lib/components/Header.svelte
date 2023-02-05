@@ -64,7 +64,7 @@
 	}
 
 	.header > a:hover {
-		color: gray;
+		color: var(--l-ns-color);
 	}
 
 	.header > a.selected {

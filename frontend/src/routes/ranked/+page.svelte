@@ -175,7 +175,7 @@
 	}
 
 	.error {
-		color: red;
+		color: var(--l-incorrect-color);
 	}
 
 	.h1 {

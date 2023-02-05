@@ -75,7 +75,7 @@ pub async fn keyracer_response(
 #[get("/{user_id}")]
 pub async fn get_user_results(data: web::Data<AppState>, path: web::Path<i64>) -> impl Responder {
     let results: Result<Vec<NrResult>, sqlx::Error> = sqlx::query_as(
-        "SELECT * FROM nr_results WHERE user_id = $1 ORDER BY created_at DESC LIMIT 100",
+        "SELECT * FROM nr_results WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50",
     )
     .bind(path.into_inner())
     .fetch_all(&data.pool)
