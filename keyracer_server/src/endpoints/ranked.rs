@@ -3,6 +3,7 @@ use crate::{endpoints::auth::User, structs::RankedResponse, utils::verify_token,
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use base64::{engine::general_purpose, Engine as _};
 use serde::{Deserialize, Serialize};
+use sqlx::Row;
 use std::io::Write;
 
 #[derive(sqlx::FromRow, Serialize)]
@@ -38,7 +39,11 @@ pub async fn get_ranked_avail(data: web::Data<AppState>, req: HttpRequest) -> im
 
     let latest_ranked =
         sqlx::query("
-                    SELECT id FROM r_results WHERE user_id = $1 AND 
+                    SELECT (
+                        SELECT start_at FROM ranked_quotes 
+                        WHERE start_at > extract(epoch from now()) 
+                        ORDER BY start_at LIMIT 1) AS next_start_at 
+                    FROM r_results WHERE user_id = $1 AND 
                     quote_id = (SELECT id FROM ranked_quotes WHERE start_at < extract(epoch from now()) 
                     ORDER BY start_at DESC LIMIT 1)")
             .bind(user.id)
@@ -46,8 +51,15 @@ pub async fn get_ranked_avail(data: web::Data<AppState>, req: HttpRequest) -> im
             .await;
 
     return match latest_ranked {
-        Ok(_) => HttpResponse::Forbidden().body("No events for you!"),
-        Err(_) => HttpResponse::Ok().finish(),
+        Ok(next_ranked) => {
+            let next_ranked: Result<i64, _> = next_ranked.try_get(0);
+
+            return match next_ranked {
+                Ok(next_ranked) => HttpResponse::Ok().body(next_ranked.to_string()),
+                Err(_) => HttpResponse::InternalServerError().body("-1"),
+            };
+        }
+        Err(_) => HttpResponse::Ok().body("0"),
     };
 }
 

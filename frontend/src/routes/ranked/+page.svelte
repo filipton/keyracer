@@ -12,7 +12,7 @@
 	} from '$lib/types';
 	import { onMount } from 'svelte';
 
-	$: rankedAvailable = $page.data.rankedAvailable as boolean;
+	$: rankedAvailable = $page.data.rankedAvailable as number;
 	let rankedQuote: string;
 	let rankedQuoteId: number = -1;
 
@@ -26,11 +26,18 @@
 	let errorTimeout: NodeJS.Timeout;
 
 	onMount(async () => {
-		if (!rankedAvailable) {
-			setError("You can't play ranked right now.", true);
-		}
+		if (rankedAvailable > 0) {
+			setError(
+				`Next ranked game: ${new Date(rankedAvailable * 1000).toLocaleString('pl-PL')}`,
+				true
+			);
+        } else if (rankedAvailable === -1) {
+            setError('You\'ve already participated this day!', true);
+		} else if (rankedAvailable === -2) {
+			setError('Something went wrong!', true);
+        }
 
-        await fetchRankingHistory();
+		await fetchRankingHistory();
 	});
 
 	async function Participate() {
@@ -50,7 +57,7 @@
 			rankedQuote = data.quote;
 			rankedQuoteId = data.id;
 		} else if (res.status === 403) {
-			setError("You've already participated in this day!");
+			setError("You've already participated this day!");
 		} else {
 			setError('Something went wrong.');
 		}
@@ -135,7 +142,7 @@
 		<div style="margin-top: 3em; text-align: center;">
 			<div class="error">{errorMessage}</div>
 
-			<button on:click={Participate} class="btn {rankedAvailable ? '' : 'disabled'}"
+			<button on:click={Participate} class="btn {rankedAvailable === 0 ? '' : 'disabled'}"
 				>PARTICIPATE</button
 			>
 		</div>
