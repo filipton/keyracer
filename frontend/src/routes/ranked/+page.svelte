@@ -2,12 +2,13 @@
 	import { page } from '$app/stores';
 	import KeyracerInput from '$lib/components/KeyracerInput.svelte';
 	import KeyracerStats from '$lib/components/KeyracerStats.svelte';
+	import RankingHistory from '$lib/components/RankingHistory.svelte';
 	import {
 		apiUrl,
 		type KeyracerFinishDetails,
 		type RankedQuote,
 		type RankedResponse,
-		type RankingEntry
+		type RankingHistoryEntry
 	} from '$lib/types';
 	import { onMount } from 'svelte';
 
@@ -15,7 +16,8 @@
 	let rankedQuote: string;
 	let rankedQuoteId: number = -1;
 
-	let ranking: RankingEntry[];
+	let rankingHistory: RankingHistoryEntry[] = [];
+	let showRanking: boolean = false;
 
 	let finishedDetails: KeyracerFinishDetails;
 	let finished: boolean = false;
@@ -24,11 +26,11 @@
 	let errorTimeout: NodeJS.Timeout;
 
 	onMount(async () => {
-		await fetchRanking();
-
 		if (!rankedAvailable) {
 			setError("You can't play ranked right now.", true);
 		}
+
+        await fetchRankingHistory();
 	});
 
 	async function Participate() {
@@ -84,12 +86,16 @@
 		});
 	}
 
-	async function fetchRanking() {
-		await fetch(`${apiUrl}/ranked/ranking`)
+	async function fetchRankingHistory() {
+		await fetch(`${apiUrl}/ranked/ranking?limit=30`)
 			.then((x: Response) => x.json())
-			.then((x: RankingEntry[]) => {
-				ranking = x;
+			.then((x: RankingHistoryEntry[]) => {
+				rankingHistory = x;
 			});
+	}
+
+	function toggleRanking() {
+		showRanking = !showRanking;
 	}
 
 	function setError(msg: string, forever: boolean = false) {
@@ -102,6 +108,10 @@
 		}, 5000);
 	}
 </script>
+
+{#if showRanking && rankingHistory.length > 0}
+	<RankingHistory {rankingHistory} on:close={toggleRanking} />
+{/if}
 
 <div class="container">
 	{#if !$page.data.user}
@@ -120,6 +130,7 @@
 	{:else}
 		<span class="h1">Ranked</span>
 		<span class="h2">Daily (refreshes at 00:00 UTC)</span>
+		<button on:click={toggleRanking} class="btn">SHOW RANKING</button>
 
 		<div style="margin-top: 3em; text-align: center;">
 			<div class="error">{errorMessage}</div>
@@ -128,26 +139,6 @@
 				>PARTICIPATE</button
 			>
 		</div>
-	{/if}
-
-	{#if ranking && !rankedQuote}
-		<h1>Ranking</h1>
-
-		<table>
-			<tr>
-				<th>#</th>
-				<th>Name</th>
-				<th>WPM</th>
-			</tr>
-
-			{#each ranking as entry, i}
-				<tr>
-					<td>{i + 1}</td>
-					<td>{entry.name}</td>
-					<td>{entry.wpm.toPrecision(4)}</td>
-				</tr>
-			{/each}
-		</table>
 	{/if}
 </div>
 
@@ -185,17 +176,5 @@
 	}
 	.h2 {
 		font-size: 1.5rem;
-	}
-
-	table {
-		border-collapse: collapse;
-	}
-
-	th,
-	td {
-		padding-left: 0.5em;
-		padding-right: 0.5em;
-
-		border: 1px solid var(--fg-color);
 	}
 </style>

@@ -2,7 +2,7 @@ use crate::{endpoints::auth::User, structs::RankedResponse, utils::verify_token,
 
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use base64::{engine::general_purpose, Engine as _};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::io::Write;
 
 #[derive(sqlx::FromRow, Serialize)]
@@ -10,6 +10,13 @@ pub struct RankedQuote {
     pub id: i32,
     pub start_at: i64,
     pub quote: String,
+}
+
+#[derive(sqlx::FromRow, Serialize)]
+pub struct RankingHistoryEntry {
+    pub id: i32,
+    pub quote: String,
+    pub start_at: i64,
 }
 
 #[derive(sqlx::FromRow, Serialize)]
@@ -117,16 +124,46 @@ pub async fn ranked_response(
     };
 }
 
+#[derive(Deserialize, Debug)]
+pub struct RankingQuery {
+    pub limit: Option<i32>,
+}
+
 #[get("/ranking")]
-pub async fn get_ranked_ranking(data: web::Data<AppState>) -> impl Responder {
+pub async fn get_ranked_history(
+    data: web::Data<AppState>,
+    query: web::Query<RankingQuery>,
+) -> impl Responder {
+    let limit: i32 = match query.limit {
+        Some(limit) => limit,
+        None => 10,
+    };
+
+    let entries: Result<Vec<RankingHistoryEntry>, sqlx::Error> = sqlx::query_as(
+        "SELECT id, quote, start_at FROM ranked_quotes 
+         WHERE start_at < extract(epoch from now()) 
+         ORDER BY start_at DESC LIMIT $1",
+    )
+    .bind(limit)
+    .fetch_all(&data.pool)
+    .await;
+
+    return match entries {
+        Ok(entries) => HttpResponse::Ok().json(entries),
+        Err(_) => HttpResponse::InternalServerError().finish(),
+    };
+}
+
+#[get("/ranking/{quote_id}")]
+pub async fn get_ranked_ranking(data: web::Data<AppState>, path: web::Path<i32>) -> impl Responder {
+    let quote_id = path.into_inner();
+
     let entries: Result<Vec<RankingEntry>, sqlx::Error> = sqlx::query_as(
         "SELECT r_results.id, users.name, r_results.time, r_results.wpm, r_results.acc, r_results.submitted_at  
          FROM r_results INNER JOIN users ON r_results.user_id = users.id 
-         WHERE quote_id = 
-            (SELECT id FROM ranked_quotes WHERE start_at < extract(epoch from now()) 
-             ORDER BY start_at DESC LIMIT 1)
-        ORDER BY wpm DESC",
+         WHERE quote_id = $1 ORDER BY wpm DESC",
     )
+    .bind(quote_id)
     .fetch_all(&data.pool)
     .await;
 

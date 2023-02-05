@@ -78,6 +78,12 @@ export type RankedResponse = {
     history: string;
 };
 
+export type RankingHistoryEntry = {
+    id: number;
+    quote: string;
+    start_at: bigint;
+};
+
 export type RankingEntry = {
     id: number;
     name: string;
