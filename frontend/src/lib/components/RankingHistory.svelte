@@ -32,7 +32,6 @@
 		const res = await fetch(`${apiUrl}/ranked/ranking/${id}`);
 		if (res.ok) {
 			ranking = await res.json();
-			console.log(ranking);
 		} else {
 			console.error('Something went wrong.');
 		}
@@ -110,8 +109,8 @@
             2em - (margin you want) * 2
             4px - border * 2
         */
-		width: calc(100vw - 2em - 4px);
-		height: calc(100vh - 2em - 4px);
+		width: calc(100% - 2em - 4px);
+		height: calc(100% - 2em - 4px);
 		max-width: 600px;
 
 		top: 50%;
