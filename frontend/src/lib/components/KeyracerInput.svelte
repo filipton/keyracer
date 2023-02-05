@@ -149,7 +149,7 @@
 			border-bottom: 3px solid transparent;
 		}
 		100% {
-			border-bottom: 3px solid red;
+			border-bottom: 3px solid var(--w-incorrect-underline);
 		}
 	}
 
@@ -162,10 +162,10 @@
 	}
 
 	.incorrect {
-		color: red;
+		color: var(--l-incorrect-color);
 	}
 
 	.extra {
-		color: darkred;
+		color: var(--l-extra-color);
 	}
 </style>

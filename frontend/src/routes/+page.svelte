@@ -8,12 +8,20 @@
 		type KeyracerResponse,
 		type QuoteJson
 	} from '$lib/types';
+	import { onMount } from 'svelte';
 
 	let debug: boolean = false;
 	let finished: boolean = false;
+
 	let selectedQuotes: boolean = false;
+	let selectedTheme: string = 'amoled';
+	let themes: string[] = ['amoled', 'dark', 'arch', 'light', 'azjat'];
 
 	let finishedDetails: KeyracerFinishDetails;
+
+	onMount(() => {
+		selectedTheme = getCookie('theme') || 'amoled';
+	});
 
 	async function finishWriting(args: any) {
 		finishedDetails = args.detail;
@@ -67,6 +75,32 @@
 			debug = !debug;
 		}
 	}
+
+	async function changeTheme() {
+		setCookie('theme', selectedTheme, 365);
+		document.documentElement.dataset.theme = selectedTheme;
+	}
+
+	function setCookie(name: string, value: string, days: number) {
+		let expires = '';
+		if (days) {
+			let date = new Date();
+			date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+			expires = '; expires=' + date.toUTCString();
+		}
+		document.cookie = name + '=' + (value || '') + expires + '; path=/';
+	}
+
+	function getCookie(name: string) {
+		let nameEQ = name + '=';
+		let ca = document.cookie.split(';');
+		for (let i = 0; i < ca.length; i++) {
+			let c = ca[i];
+			while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+		}
+		return null;
+	}
 </script>
 
 <svelte:window on:keydown={onKeyDown} />
@@ -78,8 +112,12 @@
 		<label for="quotes">Quotes</label>
 		<input type="checkbox" id="quotes" bind:checked={selectedQuotes} />
 
-		<label for="finished">Finished</label>
-		<input type="checkbox" id="finished" bind:checked={finished} />
+		<label for="theme">Theme</label>
+		<select id="theme" bind:value={selectedTheme} on:change={changeTheme}>
+			{#each themes as theme}
+				<option value={theme}>{theme}</option>
+			{/each}
+		</select>
 	</div>
 {/if}
 
