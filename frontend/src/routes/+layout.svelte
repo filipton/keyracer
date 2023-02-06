@@ -16,7 +16,10 @@
 <svelte:window on:keydown={onKeyDown} />
 
 {#if settingsMenuOpen}
-	<SettingsMenu on:close={() => (settingsMenuOpen = false)} />
+	<SettingsMenu on:close={() => {
+        settingsMenuOpen = false;
+        settingsMenuActive.set(settingsMenuOpen);
+    }} />
 {/if}
 
 <div class="main">

@@ -1,11 +1,11 @@
-import { apiUrl, type User } from "$lib/types";
+import { internalApiUrl, type User } from "$lib/types";
 import type { LayoutServerLoad } from "./$types";
 
 export const load = (async ({ fetch, cookies }) => {
     if (cookies.get("token")) {
         let session_token = cookies.get("token");
 
-        return await fetch(`${apiUrl}/auth/session`, {
+        return await fetch(`${internalApiUrl}/auth/session`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -1,4 +1,4 @@
-import { apiUrl } from '$lib/types';
+import { internalApiUrl } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, parent }) => {
@@ -9,7 +9,7 @@ export const load = (async ({ fetch, parent }) => {
         };
     }
 
-    return fetch(`${apiUrl}/ranked`, {
+    return fetch(`${internalApiUrl}/ranked`, {
         method: 'GET',
         headers: {
             Auth: parentData.token as string
