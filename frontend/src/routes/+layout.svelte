@@ -1,6 +1,21 @@
-<script>
+<script lang="ts">
 	import Header from '$lib/components/Header.svelte';
+	import SettingsMenu from '$lib/components/SettingsMenu.svelte';
+
+	let settingsMenuOpen: boolean = false;
+
+	async function onKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			settingsMenuOpen = !settingsMenuOpen;
+		}
+	}
 </script>
+
+<svelte:window on:keydown={onKeyDown} />
+
+{#if settingsMenuOpen}
+	<SettingsMenu on:close={() => (settingsMenuOpen = false)} />
+{/if}
 
 <div class="main">
 	<Header />
