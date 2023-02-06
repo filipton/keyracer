@@ -8,6 +8,8 @@
 
 	let currentSelectedPath: string[] = [];
 	let currentShownMenu: MenuItem[] = [];
+	let currentElementId: number = 0;
+
 	let menu: MenuItem[] = [
 		{
 			name: 'Themes',
@@ -18,7 +20,61 @@
 
 	onMount(async () => {
 		await getThemes();
+		navigation(0, 0);
 	});
+
+	async function onKeyDown(event: KeyboardEvent) {
+		event.preventDefault();
+
+		switch (event.key) {
+			case 'ArrowUp':
+			case 'k':
+				navigation(-1);
+				break;
+
+			case 'ArrowDown':
+			case 'Tab':
+			case 'j':
+				navigation(1);
+				break;
+
+			case 'Enter':
+				await clickAction(currentShownMenu[currentElementId]);
+				break;
+
+			case 'Backspace':
+				await backPane();
+				break;
+		}
+	}
+
+	function navigation(mv: number, force: number = -1) {
+		currentElementId += mv;
+		if (force > -1) currentElementId = force;
+
+		if (currentElementId >= currentShownMenu.length) {
+			currentElementId = 0;
+		} else if (currentElementId < 0) {
+			currentElementId = currentShownMenu.length - 1;
+		}
+
+		// @ts-ignore
+		document.getElementById(`elem-${currentElementId}`).focus();
+	}
+
+	async function backPane() {
+		let prevName = currentSelectedPath.pop();
+		if (!prevName) {
+			dispatch('close');
+			return;
+		}
+
+		await calculateMenu();
+		navigation(
+			0,
+			currentShownMenu.findIndex((x) => x.name === prevName)
+		);
+	}
 
 	async function getThemes() {
 		let currentTheme: string = getCookie('theme') || 'amoled';
@@ -55,7 +111,7 @@
 		let tmpMenu = menu;
 
 		while (true) {
-			let relativePath = menuPath.pop();
+			let relativePath = menuPath.shift();
 			let tmpIndex = tmpMenu.findIndex((x) => x.name === relativePath);
 
 			if (tmpIndex >= 0) {
@@ -95,14 +151,16 @@
 	}
 </script>
 
+<svelte:window on:keydown={onKeyDown} />
+
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="back-blur" on:click={() => dispatch('close')} />
 
 <div class="window">
 	<div class="nav" />
 
-	{#each currentShownMenu as element}
-		<button class="element" on:click={async () => await clickAction(element)}>
+	{#each currentShownMenu as element, i}
+		<button class="element" on:click={async () => await clickAction(element)} id="elem-{i}">
 			<Icon type={element.icon} size={18} />
 			<span> {element.name} </span>
 		</button>

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import SettingsMenu from '$lib/components/SettingsMenu.svelte';
+	import { settingsMenuActive } from '$lib/stores';
 
 	let settingsMenuOpen: boolean = false;
 
 	async function onKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			settingsMenuOpen = !settingsMenuOpen;
+            settingsMenuActive.set(settingsMenuOpen);
 		}
 	}
 </script>

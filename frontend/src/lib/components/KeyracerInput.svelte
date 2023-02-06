@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { settingsMenuActive } from '$lib/stores';
 	import {
 		CharState,
 		type InputChar,
@@ -39,7 +40,7 @@
 	});
 
 	function onKeyDown(event: KeyboardEvent) {
-		if (finished || (event.key === '~' && event.ctrlKey)) return;
+		if (finished || (event.key === '~' && event.ctrlKey) || $settingsMenuActive) return;
 		inputer.processKeyEvent(event);
 
 		caret.processCaret(inputer.words, inputer.currentWordIndex, inputer.currentCharIndex);
@@ -138,7 +139,6 @@
 		-ms-user-select: none; /* IE 10 and IE 11 */
 		user-select: none; /* Standard syntax */
 	}
-
 
 	.incorrect-word > letter {
 		animation: border-bottom 0.5s;
