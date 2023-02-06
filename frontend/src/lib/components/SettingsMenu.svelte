@@ -2,9 +2,11 @@
 	import type { MenuItem } from '$lib/types';
 	import { changeTheme, getCookie, themes } from '$lib/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import CustomThemeColor from './CustomThemeColor.svelte';
 	import Icon from './SettingsIcon.svelte';
 
 	let dispatch = createEventDispatcher();
+	let customThemeSelector: boolean = false;
 
 	let currentSelectedPath: string[] = [];
 	let currentShownMenu: MenuItem[] = [];
@@ -91,6 +93,16 @@
 			});
 		}
 
+		tmpThemes.push({
+			name: 'custom',
+			icon: currentTheme === 'custom' ? 'checkmark' : '',
+			action: async () => {
+				customThemeSelector = true;
+				changeTheme('custom');
+				await getThemes();
+			}
+		});
+
 		await insertMenu(['Themes'], tmpThemes, true);
 	}
 
@@ -153,6 +165,10 @@
 
 <svelte:window on:keydown={onKeyDown} />
 
+{#if customThemeSelector}
+	<CustomThemeColor />
+{/if}
+
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="back-blur" on:click={() => dispatch('close')} />
 
@@ -193,6 +209,22 @@
 
 		border-radius: 0.5em;
 		background-color: var(--bg-color);
+
+		overflow-y: scroll;
+	}
+
+	.window::-webkit-scrollbar {
+		width: 5px;
+	}
+	.window::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.window::-webkit-scrollbar-thumb {
+		background: #888;
+		border-radius: 10px;
+	}
+	.window::-webkit-scrollbar-thumb:hover {
+		background: #555;
 	}
 
 	.nav {
