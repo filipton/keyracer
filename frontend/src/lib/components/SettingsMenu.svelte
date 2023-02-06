@@ -244,12 +244,11 @@
 		position: absolute;
 
 		width: calc(100% - 2em);
-		height: calc(100% - 8em);
 		max-width: 600px;
 
-		top: 50%;
+		top: 4em;
 		left: 50%;
-		transform: translate(-50%, -50%);
+		transform: translate(-50%, 0);
 
 		z-index: 1000;
 
