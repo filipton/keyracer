@@ -8,6 +8,9 @@
 	let dispatch = createEventDispatcher();
 	let customThemeSelector: boolean = false;
 
+	let searchElement: HTMLElement;
+	let searchString: string = '';
+
 	let currentSelectedPath: string[] = [];
 	let currentShownMenu: MenuItem[] = [];
 	let currentElementId: number = 0;
@@ -26,28 +29,46 @@
 	});
 
 	async function onKeyDown(event: KeyboardEvent) {
-		event.preventDefault();
-
 		switch (event.key) {
 			case 'ArrowUp':
-			case 'k':
+				event.preventDefault();
 				navigation(-1);
 				break;
 
 			case 'ArrowDown':
 			case 'Tab':
-			case 'j':
+				event.preventDefault();
 				navigation(1);
 				break;
 
 			case 'Enter':
+				event.preventDefault();
 				await clickAction(currentShownMenu[currentElementId]);
 				break;
 
-			case 'Backspace':
+			case 'Escape':
+				event.preventDefault();
 				await backPane();
 				break;
+
+			default:
+				searchElement.focus();
+				break;
 		}
+	}
+
+	async function search() {
+		await calculateMenu();
+		navigation(0, 0);
+
+		let tmpMenu: MenuItem[] = [];
+		for (let item of currentShownMenu) {
+			if (item.name.toLowerCase().includes(searchString.toLowerCase())) {
+				tmpMenu.push(item);
+			}
+		}
+
+		currentShownMenu = tmpMenu;
 	}
 
 	function navigation(mv: number, force: number = -1) {
@@ -113,6 +134,8 @@
 		} else {
 			element.action();
 		}
+
+		searchString = '';
 	}
 
 	async function insertMenu(
@@ -173,7 +196,30 @@
 <div class="back-blur" on:click={() => dispatch('close')} />
 
 <div class="window">
-	<div class="nav" />
+	<div class="nav">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+			stroke-width="2"
+			stroke="currentColor"
+			style="width: 22px; height: 22px;"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+			/>
+		</svg>
+
+		<input
+			type="text"
+			placeholder="Search"
+			bind:value={searchString}
+			bind:this={searchElement}
+			on:input={async () => await search()}
+		/>
+	</div>
 
 	{#each currentShownMenu as element, i}
 		<button class="element" on:click={async () => await clickAction(element)} id="elem-{i}">
@@ -198,7 +244,7 @@
 		position: absolute;
 
 		width: calc(100% - 2em);
-		height: calc(100% - 2em);
+		height: calc(100% - 8em);
 		max-width: 600px;
 
 		top: 50%;
@@ -228,14 +274,26 @@
 	}
 
 	.nav {
-		margin-top: 3em;
-		border-bottom: 2px solid var(--fg-color);
+		display: flex;
+		align-items: center;
+
+		padding-left: 0.5em;
+		padding-right: 0.5em;
 	}
-	.nav:after {
-		content: 'SEARCH HERE...';
-		position: absolute;
-		right: 0.5em;
-		top: 0.5em;
+
+	.nav > input {
+		height: 22px;
+		padding: 16px;
+
+		font-size: 1rem;
+		width: 100%;
+
+		margin: 0;
+		outline: none;
+
+		border: none;
+		background-color: var(--bg-color);
+		color: var(--fg-color);
 	}
 
 	.element {

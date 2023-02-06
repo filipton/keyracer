@@ -1,3 +1,9 @@
+<script lang="ts">
+	import { page } from '$app/stores';
+
+	let userId: string = $page.data.user ? $page.data.user.id : '';
+</script>
+
 <div class="header">
 	<a href="/ranked" title="Ranked">
 		<svg
@@ -18,7 +24,7 @@
 
 	<a href="/" class="logo">KEYRACER</a>
 
-	<a href="/user" title="User">
+	<a href="/user/{userId}" title="User">
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			fill="none"
@@ -43,8 +49,8 @@
 		align-items: center;
 		max-width: 960px;
 
-        padding-left: 1em;
-        padding-right: 1em;
+		padding-left: 1em;
+		padding-right: 1em;
 		height: 59px;
 
 		margin: 0 auto;
