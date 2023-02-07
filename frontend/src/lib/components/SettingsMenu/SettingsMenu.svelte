@@ -20,12 +20,6 @@
 			name: 'Themes',
 			action: () => {},
 			sub: []
-		},
-		{
-			name: 'Keyboard Tester',
-			action: () => {
-				console.log('Here will be keyboard tester');
-			}
 		}
 	];
 
@@ -63,9 +57,9 @@
 		}
 	}
 
-	async function search() {
+	async function search(changeNav: boolean = true) {
 		await calculateMenu();
-		navigation(0, 0);
+		if (changeNav) navigation(0, 0);
 
 		let tmpMenu: MenuItem[] = [];
 		for (let item of currentShownMenu) {
@@ -133,15 +127,15 @@
 	}
 
 	async function clickAction(element: MenuItem) {
+		searchString = '';
+		search(!!element.sub);
+
 		if (element.sub) {
 			currentSelectedPath.push(element.name);
 			await calculateMenu();
 		} else {
 			element.action();
 		}
-
-		searchString = '';
-        search();
 	}
 
 	async function insertMenu(

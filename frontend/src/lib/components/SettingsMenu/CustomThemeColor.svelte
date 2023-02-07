@@ -45,75 +45,79 @@
 </script>
 
 <div class="floating-window">
-	<div class="grid-container">
-		<div>
-			<label for="bg-color"> Background color: </label>
-			<input type="color" id="bg-color" bind:value={bgColor} on:change={() => updateTheme()} />
+	<div class="container">
+		<div class="pane">
+			<label for="bg-color">
+				Background color
+				<input type="color" id="bg-color" bind:value={bgColor} on:change={() => updateTheme()} />
+			</label>
+
+			<label for="fg-color">
+				Foreground color
+				<input type="color" id="fg-color" bind:value={fgColor} on:change={() => updateTheme()} />
+			</label>
+
+			<label for="l-correct-color">
+				Correct color
+				<input
+					type="color"
+					id="l-correct-color"
+					bind:value={lCorrectColor}
+					on:change={() => updateTheme()}
+				/>
+			</label>
+
+			<label for="l-ns-color">
+				Not started color
+				<input type="color" id="l-ns-color" bind:value={lNsColor} on:change={() => updateTheme()} />
+			</label>
 		</div>
 
-		<div>
-			<label for="fg-color"> Foreground color: </label>
-			<input type="color" id="fg-color" bind:value={fgColor} on:change={() => updateTheme()} />
-		</div>
+		<div class="pane">
+			<label for="l-incorrect-color">
+				Incorrect color
+				<input
+					type="color"
+					id="l-incorrect-color"
+					bind:value={lIncorrectColor}
+					on:change={() => updateTheme()}
+				/>
+			</label>
 
-		<div>
-			<label for="l-correct-color"> Correct color: </label>
-			<input
-				type="color"
-				id="l-correct-color"
-				bind:value={lCorrectColor}
-				on:change={() => updateTheme()}
-			/>
-		</div>
+			<label for="l-extra-color">
+				Extra color
+				<input
+					type="color"
+					id="l-extra-color"
+					bind:value={lExtraColor}
+					on:change={() => updateTheme()}
+				/>
+			</label>
 
-		<div>
-			<label for="l-ns-color"> Not started color: </label>
-			<input type="color" id="l-ns-color" bind:value={lNsColor} on:change={() => updateTheme()} />
-		</div>
+			<label for="l-incorrect-underline">
+				Incorrect underline
+				<input
+					type="color"
+					id="l-incorrect-underline"
+					bind:value={lIncorrectUnderline}
+					on:change={() => updateTheme()}
+				/>
+			</label>
 
-		<div>
-			<label for="l-incorrect-color"> Incorrect color: </label>
-			<input
-				type="color"
-				id="l-incorrect-color"
-				bind:value={lIncorrectColor}
-				on:change={() => updateTheme()}
-			/>
-		</div>
-
-		<div>
-			<label for="l-extra-color"> Extra color: </label>
-			<input
-				type="color"
-				id="l-extra-color"
-				bind:value={lExtraColor}
-				on:change={() => updateTheme()}
-			/>
-		</div>
-
-		<div>
-			<label for="l-incorrect-underline"> Incorrect underline: </label>
-			<input
-				type="color"
-				id="l-incorrect-underline"
-				bind:value={lIncorrectUnderline}
-				on:change={() => updateTheme()}
-			/>
-		</div>
-
-		<div>
-			<label for="caret-color"> Caret color: </label>
-			<input
-				type="color"
-				id="caret-color"
-				bind:value={lCaretColor}
-				on:change={() => updateTheme()}
-			/>
+			<label for="caret-color">
+				Caret color
+				<input
+					type="color"
+					id="caret-color"
+					bind:value={lCaretColor}
+					on:change={() => updateTheme()}
+				/>
+			</label>
 		</div>
 	</div>
 
 	<button
-		class="btn"
+		class="btn update-theme"
 		on:click={() => {
 			updateTheme(true);
 			dispatch('close');
@@ -131,25 +135,47 @@
 		transform: translate(-50%, -50%);
 
 		width: 100%;
-		max-width: 500px;
+		max-width: 600px;
 
 		text-align: center;
+		background-color: var(--bg-color);
+		border-radius: 10px;
 
 		z-index: 10000;
 	}
 
-	.floating-window > .grid-container {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		grid-gap: 1rem;
-		padding: 1rem;
-		background-color: var(--bg-color);
+	.update-theme {
+		margin-top: 2em;
+		margin-bottom: 1em;
+	}
+
+	.floating-window > .container {
+		padding: 1em;
+
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+
 		color: var(--fg-color);
 	}
 
-	.floating-window > .grid-container > div {
+	.pane {
 		display: flex;
 		flex-direction: column;
+		gap: 10px;
+	}
+
+	.pane > label {
+		display: flex;
+		flex-direction: row;
 		align-items: center;
+		justify-content: space-between;
+	}
+
+	input {
+		margin-left: 10px;
+
+		border: 0;
+		padding: 0;
 	}
 </style>
