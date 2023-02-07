@@ -1,14 +1,7 @@
-export const apiUrl = "http://127.0.0.1:8080/api";
+export const apiUrl = "https://kr.filipton.space/api";
 export const internalApiUrl = "http://127.0.0.1:8080/api";
 
 
-export type MenuItem = {
-    name: string;
-    icon?: string;
-    action: () => void;
-
-    sub?: MenuItem[];
-};
 
 export enum CharState {
     NotStarted,

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import KeyracerInput from '$lib/components/KeyracerInput.svelte';
-	import KeyracerStats from '$lib/components/KeyracerStats.svelte';
+	import KeyracerInput from '$lib/components/Input/KeyracerInput.svelte';
+	import KeyracerStats from '$lib/components/Input/KeyracerStats.svelte';
 	import RankingHistory from '$lib/components/RankingHistory.svelte';
 	import {
 		apiUrl,

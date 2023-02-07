@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { MenuItem } from '$lib/types';
-	import { changeTheme, getCookie, themes } from '$lib/utils';
+	import { getCookie } from '$lib/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import CustomThemeColor from './CustomThemeColor.svelte';
 	import Icon from './SettingsIcon.svelte';
+	import { changeTheme, themes, type MenuItem } from './settingsUtils';
 
 	let dispatch = createEventDispatcher();
 	let customThemeSelector: boolean = false;
@@ -20,6 +20,12 @@
 			name: 'Themes',
 			action: () => {},
 			sub: []
+		},
+		{
+			name: 'Keyboard Tester',
+			action: () => {
+				console.log('Here will be keyboard tester');
+			}
 		}
 	];
 
@@ -135,6 +141,7 @@
 		}
 
 		searchString = '';
+        search();
 	}
 
 	async function insertMenu(

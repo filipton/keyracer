@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import SettingsMenu from '$lib/components/SettingsMenu.svelte';
+	import SettingsMenu from '$lib/components/SettingsMenu/SettingsMenu.svelte';
 	import { settingsMenuActive } from '$lib/stores';
 
 	async function onKeyDown(event: KeyboardEvent) {
