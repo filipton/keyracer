@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { getCookie, setCookie } from '$lib/utils';
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
+
+	let dispatch = createEventDispatcher();
 
 	let bgColor: string = '#000000';
 	let fgColor: string = '#ffffff';
@@ -12,7 +14,7 @@
 	let lCaretColor: string = 'green';
 
 	onMount(async () => {
-		let themeCookie = getCookie('custom-theme');
+		let themeCookie = getCookie('theme');
 		if (themeCookie == null) return;
 
 		let customTheme = themeCookie.split(',');
@@ -27,9 +29,9 @@
 		lCaretColor = customTheme[7];
 	});
 
-	function updateTheme() {
+	function updateTheme(changeCookie: boolean = false) {
 		let customTheme = `${bgColor},${fgColor},${lCorrectColor},${lNsColor},${lIncorrectColor},${lExtraColor},${lIncorrectUnderline},${lCaretColor}`;
-		setCookie('custom-theme', customTheme, 365);
+		if (changeCookie) setCookie('theme', customTheme, 365);
 
 		document.documentElement.style.setProperty('--bg-color', bgColor);
 		document.documentElement.style.setProperty('--fg-color', fgColor);
@@ -46,46 +48,79 @@
 	<div class="grid-container">
 		<div>
 			<label for="bg-color"> Background color: </label>
-			<input type="color" id="bg-color" bind:value={bgColor} />
+			<input type="color" id="bg-color" bind:value={bgColor} on:change={() => updateTheme()} />
 		</div>
 
 		<div>
 			<label for="fg-color"> Foreground color: </label>
-			<input type="color" id="fg-color" bind:value={fgColor} />
+			<input type="color" id="fg-color" bind:value={fgColor} on:change={() => updateTheme()} />
 		</div>
 
 		<div>
 			<label for="l-correct-color"> Correct color: </label>
-			<input type="color" id="l-correct-color" bind:value={lCorrectColor} />
+			<input
+				type="color"
+				id="l-correct-color"
+				bind:value={lCorrectColor}
+				on:change={() => updateTheme()}
+			/>
 		</div>
 
 		<div>
 			<label for="l-ns-color"> Not started color: </label>
-			<input type="color" id="l-ns-color" bind:value={lNsColor} />
+			<input type="color" id="l-ns-color" bind:value={lNsColor} on:change={() => updateTheme()} />
 		</div>
 
 		<div>
 			<label for="l-incorrect-color"> Incorrect color: </label>
-			<input type="color" id="l-incorrect-color" bind:value={lIncorrectColor} />
+			<input
+				type="color"
+				id="l-incorrect-color"
+				bind:value={lIncorrectColor}
+				on:change={() => updateTheme()}
+			/>
 		</div>
 
 		<div>
 			<label for="l-extra-color"> Extra color: </label>
-			<input type="color" id="l-extra-color" bind:value={lExtraColor} />
+			<input
+				type="color"
+				id="l-extra-color"
+				bind:value={lExtraColor}
+				on:change={() => updateTheme()}
+			/>
 		</div>
 
 		<div>
 			<label for="l-incorrect-underline"> Incorrect underline: </label>
-			<input type="color" id="l-incorrect-underline" bind:value={lIncorrectUnderline} />
+			<input
+				type="color"
+				id="l-incorrect-underline"
+				bind:value={lIncorrectUnderline}
+				on:change={() => updateTheme()}
+			/>
 		</div>
 
 		<div>
 			<label for="caret-color"> Caret color: </label>
-			<input type="color" id="caret-color" bind:value={lCaretColor} />
+			<input
+				type="color"
+				id="caret-color"
+				bind:value={lCaretColor}
+				on:change={() => updateTheme()}
+			/>
 		</div>
 	</div>
 
-	<button class="btn" on:click={updateTheme}> Update theme </button>
+	<button
+		class="btn"
+		on:click={() => {
+			updateTheme(true);
+			dispatch('close');
+		}}
+	>
+		Update theme
+	</button>
 </div>
 
 <style>

@@ -100,15 +100,15 @@
 	}
 
 	async function getThemes() {
-		let currentTheme: string = getCookie('theme') || 'amoled';
+		let currentTheme: string = getCookie('theme') || '';
 		let tmpThemes: MenuItem[] = [];
 
 		for (let theme of themes) {
 			tmpThemes.push({
-				name: theme,
-				icon: theme === currentTheme ? 'checkmark' : '',
+				name: theme[0],
+				icon: theme[1] === currentTheme ? 'checkmark' : '',
 				action: async () => {
-					changeTheme(theme);
+					changeTheme(theme[1]);
 					await getThemes();
 				}
 			});
@@ -116,10 +116,9 @@
 
 		tmpThemes.push({
 			name: 'custom',
-			icon: currentTheme === 'custom' ? 'checkmark' : '',
+			icon: [...themes.values()].filter((x) => x === currentTheme).length === 0 ? 'checkmark' : '',
 			action: async () => {
 				customThemeSelector = true;
-				changeTheme('custom');
 				await getThemes();
 			}
 		});
@@ -189,7 +188,7 @@
 <svelte:window on:keydown={onKeyDown} />
 
 {#if customThemeSelector}
-	<CustomThemeColor />
+	<CustomThemeColor on:close={() => (customThemeSelector = false)} />
 {/if}
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -244,6 +243,7 @@
 		position: absolute;
 
 		width: calc(100% - 2em);
+		max-height: calc(100% - 8em);
 		max-width: 600px;
 
 		top: 4em;

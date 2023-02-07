@@ -83,41 +83,6 @@
             border-style: solid;
             border-color: var(--fg-color) transparent transparent transparent;
         }
-
-        html[data-theme="dark"] {
-            --bg-color: #111111;
-            --fg-color: white;
-            --l-correct-color: white;
-            --l-ns-color: gray;
-            --caret-color: lime;
-        }
-
-        html[data-theme="arch"] {
-            --bg-color: #0c0d11;
-            --fg-color: #7ebab5;
-            --l-correct-color: white;
-            --l-ns-color: gray;
-            --caret-color: #7ebab5;
-        }
-
-        html[data-theme="light"] {
-            --bg-color: #f0f0f0;
-            --fg-color: black;
-            --l-correct-color: black;
-            --l-ns-color: gray;
-            --caret-color: green;
-        }
-
-        html[data-theme="matcha"] {
-            --bg-color: #a4b07e;
-            --fg-color: #6d4930;
-            --l-correct-color: #6d4930;
-            --l-ns-color: #825e459e;
-            --l-incorrect-color: #905963;
-            --l-extra-color: #6a363f;
-            --w-incorrect-underline: #6a363f;
-            --caret-color: #e0e0af9e;
-        }
     </style>
 
     <script>
@@ -137,18 +102,16 @@
             return "";
         }
 
-        document.documentElement.dataset.theme = getCookie("theme");
-        if (document.documentElement.dataset.theme === "custom") {
-            let customTheme = getCookie("custom-theme").split(',');
-
-            document.documentElement.style.setProperty("--bg-color", customTheme[0]);
-            document.documentElement.style.setProperty("--fg-color", customTheme[1]);
-            document.documentElement.style.setProperty("--l-correct-color", customTheme[2]);
-            document.documentElement.style.setProperty("--l-ns-color", customTheme[3]);
-            document.documentElement.style.setProperty("--l-incorrect-color", customTheme[4]);
-            document.documentElement.style.setProperty("--l-extra-color", customTheme[5]);
-            document.documentElement.style.setProperty("--w-incorrect-underline", customTheme[6]);
-            document.documentElement.style.setProperty("--caret-color", customTheme[7]);
+        let theme = getCookie("theme").split(',');
+        if (theme.length === 8) {
+            document.documentElement.style.setProperty("--bg-color", theme[0]);
+            document.documentElement.style.setProperty("--fg-color", theme[1]);
+            document.documentElement.style.setProperty("--l-correct-color", theme[2]);
+            document.documentElement.style.setProperty("--l-ns-color", theme[3]);
+            document.documentElement.style.setProperty("--l-incorrect-color", theme[4]);
+            document.documentElement.style.setProperty("--l-extra-color", theme[5]);
+            document.documentElement.style.setProperty("--w-incorrect-underline", theme[6]);
+            document.documentElement.style.setProperty("--caret-color", theme[7]);
         }
     </script>
 </head>

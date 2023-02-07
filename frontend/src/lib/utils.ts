@@ -1,8 +1,25 @@
-export const themes: string[] = ['amoled', 'dark', 'arch', 'light', 'matcha'];
+export const themes: Map<string, string> = new Map([
+    ['amoled', 'black,white,white,gray,red,darkred,red,green'],
+    ['dark', '#111111,white,white,gray,red,darkred,red,lime'],
+    ['arch', '#0c0d11,#7ebab5,white,gray,red,darkred,red,#7ebab5'],
+    ['light', '#f0f0f0,black,black,gray,red,darkred,red,green'],
+    ['matcha', '#a4b07e,#6d4930,#6d4930,#825e459e,#905963,#6a363f,#6a363f,#e0e0af9e']
+]);
 
 export function changeTheme(selectedTheme: string) {
+    let theme = selectedTheme.split(',');
+    if (theme.length != 8) return;
+
     setCookie('theme', selectedTheme, 365);
-    document.documentElement.dataset.theme = selectedTheme;
+
+    document.documentElement.style.setProperty("--bg-color", theme[0]);
+    document.documentElement.style.setProperty("--fg-color", theme[1]);
+    document.documentElement.style.setProperty("--l-correct-color", theme[2]);
+    document.documentElement.style.setProperty("--l-ns-color", theme[3]);
+    document.documentElement.style.setProperty("--l-incorrect-color", theme[4]);
+    document.documentElement.style.setProperty("--l-extra-color", theme[5]);
+    document.documentElement.style.setProperty("--w-incorrect-underline", theme[6]);
+    document.documentElement.style.setProperty("--caret-color", theme[7]);
 }
 
 
