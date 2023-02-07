@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { wordsList, quotesList, settings } from '$lib/stores';
 	import KeyracerInput from '$lib/components/Input/KeyracerInput.svelte';
 	import KeyracerStats from '$lib/components/Input/KeyracerStats.svelte';
 	import {
 		apiUrl,
+		Mode,
 		type KeyracerFinishDetails,
 		type KeyracerResponse,
 		type QuoteJson
@@ -12,10 +14,38 @@
 	let debug: boolean = false;
 	let finished: boolean = false;
 
-	let selectedQuotes: boolean = false;
+	let input: string;
 
 	let restartButton: HTMLElement;
 	let finishedDetails: KeyracerFinishDetails;
+
+	settings.subscribe(async (x) => {
+        if(!x) return;
+
+		await getWordsList();
+		await getInput();
+	});
+
+	async function getInput() {
+		switch ($settings.mode) {
+			case Mode.Words:
+				let wordsCount = 15;
+				input = $wordsList
+					.sort(() => Math.random() - 0.5)
+					.slice(0, wordsCount)
+					.join(' ');
+				break;
+
+			case Mode.Quote:
+				let quote = $quotesList[Math.floor(Math.random() * $quotesList.length)];
+				input = quote.quote;
+				break;
+
+			default:
+				input = 'ErRoR dUe tO iNvAlId MoDe';
+				break;
+		}
+	}
 
 	async function finishWriting(args: any) {
 		finishedDetails = args.detail;
@@ -32,11 +62,6 @@
 			history: keystrokesStr
 		};
 
-		if (!$page.data.token) {
-			setTimeout(() => alert('Login to save your results!'), 1000);
-			return;
-		}
-
 		await fetch(`${apiUrl}/results`, {
 			method: 'POST',
 			headers: {
@@ -51,16 +76,17 @@
 		});
 	}
 
-	async function getWordsList(quote: boolean = false): Promise<string> {
-		if (!quote) {
-			const response = await fetch(`${apiUrl}/test/words/15`);
-			const words = await response.json();
-			return words.join(' ');
-		}
+	async function getWordsList() {
+		if ($wordsList.length > 0 && $quotesList.length > 0) return;
 
-		const response = await fetch(`${apiUrl}/test/quote`);
-		const qresp: QuoteJson = await response.json();
-		return qresp.quote;
+		await Promise.all([
+			fetch(`${apiUrl}/data/words`).then(async (x: Response) => {
+				wordsList.set((await x.text()).split('\n'));
+			}),
+			fetch(`${apiUrl}/data/quotes`).then(async (x: Response) => {
+				quotesList.set((await x.json()) as QuoteJson[]);
+			})
+		]);
 	}
 
 	async function onKeyDown(event: KeyboardEvent) {
@@ -81,9 +107,6 @@
 {#if debug}
 	<div class="debug-selector">
 		<h1 style="text-align: center; line-height: 0;">Debug</h1>
-
-		<label for="quotes">Quotes</label>
-		<input type="checkbox" id="quotes" bind:checked={selectedQuotes} />
 
 		<label for="finished">Finished</label>
 		<input type="checkbox" id="finished" bind:checked={finished} />
@@ -107,10 +130,8 @@
 				RESTART</button
 			>
 		</div>
-	{:else}
-		{#await getWordsList(selectedQuotes) then words}
-			<KeyracerInput input={words} {debug} on:finished={finishWriting} />
-		{/await}
+	{:else if input}
+		<KeyracerInput {input} {debug} on:finished={finishWriting} />
 	{/if}
 </div>
 

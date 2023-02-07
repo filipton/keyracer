@@ -1,7 +1,13 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import SettingsMenu from '$lib/components/SettingsMenu/SettingsMenu.svelte';
+	import { loadSettings } from '$lib/components/SettingsMenu/settingsUtils';
 	import { settingsMenuActive } from '$lib/stores';
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		loadSettings();
+	});
 
 	async function onKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {

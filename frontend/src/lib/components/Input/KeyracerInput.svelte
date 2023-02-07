@@ -29,15 +29,23 @@
 	let dispatch = createEventDispatcher();
 
 	onMount(() => {
-		inputer.init(input);
-
-		caret.processCaret(inputer.words, inputer.currentWordIndex, inputer.currentCharIndex);
-		caret.setCaretBlinkState(true);
+		init();
 	});
+	$: {
+		if (caret && input) init();
+	}
+
 	afterUpdate(() => {
 		if (!finished)
 			caret.processCaret(inputer.words, inputer.currentWordIndex, inputer.currentCharIndex);
 	});
+
+	function init() {
+		inputer.init(input);
+
+		caret.processCaret(inputer.words, inputer.currentWordIndex, inputer.currentCharIndex);
+		caret.setCaretBlinkState(true);
+	}
 
 	function onKeyDown(event: KeyboardEvent) {
 		if (finished || (event.key === '~' && event.ctrlKey) || $settingsMenuActive) return;

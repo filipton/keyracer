@@ -1,3 +1,4 @@
+import { settings } from "$lib/stores";
 import { setCookie } from "$lib/utils";
 
 export const themes: Map<string, string> = new Map([
@@ -30,4 +31,28 @@ export function changeTheme(selectedTheme: string) {
     document.documentElement.style.setProperty("--l-extra-color", theme[5]);
     document.documentElement.style.setProperty("--w-incorrect-underline", theme[6]);
     document.documentElement.style.setProperty("--caret-color", theme[7]);
+}
+
+
+export type Settings = {
+    mode: number;
+};
+
+export function loadSettings() {
+    let tmpSettings: Settings = {
+        mode: 0
+    };
+
+    let settingsStr = localStorage.getItem('settings');
+    if (settingsStr) {
+        tmpSettings = JSON.parse(settingsStr);
+    }
+
+    settings.set(tmpSettings);
+}
+
+export function saveSettings() {
+    settings.subscribe(value => {
+        localStorage.setItem('settings', JSON.stringify(value));
+    });
 }

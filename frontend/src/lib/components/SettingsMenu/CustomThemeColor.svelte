@@ -7,11 +7,11 @@
 	let bgColor: string = '#000000';
 	let fgColor: string = '#ffffff';
 	let lCorrectColor: string = '#ffffff';
-	let lNsColor: string = 'gray';
+	let lNsColor: string = '#808080';
 	let lIncorrectColor: string = '#ff0000';
-	let lExtraColor: string = 'darkred';
-	let lIncorrectUnderline: string = 'red';
-	let lCaretColor: string = 'green';
+	let lExtraColor: string = '#8B0000';
+	let lIncorrectUnderline: string = '#ff0000';
+	let lCaretColor: string = '#00ff00';
 
 	onMount(async () => {
 		let themeCookie = getCookie('theme');

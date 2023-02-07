@@ -1,7 +1,5 @@
-export const apiUrl = "https://kr.filipton.space/api";
+export const apiUrl = "http://127.0.0.1:8080/api";
 export const internalApiUrl = "http://127.0.0.1:8080/api";
-
-
 
 export enum CharState {
     NotStarted,
@@ -94,4 +92,9 @@ export type RankingEntry = {
     wpm: number;
     acc: number;
     submitted_at: bigint;
+};
+
+export enum Mode {
+    Words,
+    Quote
 };

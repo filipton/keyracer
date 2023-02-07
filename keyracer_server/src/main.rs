@@ -29,20 +29,9 @@ async fn main() -> std::io::Result<()> {
 
                 words_list: std::fs::read_to_string("./words_list.txt")
                     .unwrap()
-                    .lines()
-                    .filter_map(|x| {
-                        //if x.len() > 10 {
-                        //    return None;
-                        //}
-                        return Some(x.to_string());
-                    })
-                    .collect(),
+                    .replace("\r", ""),
 
-                quotes_list: serde_json::from_str(
-                    std::fs::read_to_string("./quotes.json").unwrap().as_str(),
-                )
-                .unwrap(),
-
+                quotes_list: std::fs::read_to_string("./quotes.json").unwrap(),
                 google_jwks: google_keys.clone(),
             };
 
@@ -77,11 +66,9 @@ async fn main() -> std::io::Result<()> {
                 .service(endpoints::ranked::ranked_response),
         )
         .service(
-            web::scope("/api/test")
-                .service(endpoints::test::get_index)
-                .service(endpoints::test::get_test)
-                .service(endpoints::test::test)
-                .service(endpoints::test::get_quotes_entry),
+            web::scope("/api/data")
+                .service(endpoints::data::get_words)
+                .service(endpoints::data::get_quotes),
         )
     })
     .bind(("0.0.0.0", port))?

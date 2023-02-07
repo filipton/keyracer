@@ -1,12 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-#[allow(non_snake_case)]
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct QouteEntry {
-    pub quote: String,
-    pub author: String,
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct KeyracerResponse {
     pub time: i32,

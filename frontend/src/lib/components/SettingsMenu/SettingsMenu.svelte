@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { settings } from '$lib/stores';
+	import { Mode } from '$lib/types';
 	import { getCookie } from '$lib/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import CustomThemeColor from './CustomThemeColor.svelte';
 	import Icon from './SettingsIcon.svelte';
-	import { changeTheme, themes, type MenuItem } from './settingsUtils';
+	import { changeTheme, saveSettings, themes, type MenuItem } from './settingsUtils';
 
 	let dispatch = createEventDispatcher();
 	let customThemeSelector: boolean = false;
@@ -20,13 +22,42 @@
 			name: 'Themes',
 			action: () => {},
 			sub: []
+		},
+		{
+			name: 'Modes',
+			action: () => {},
+			sub: []
 		}
 	];
 
 	onMount(async () => {
 		await getThemes();
+		await getModes();
 		navigation(0, 0);
 	});
+
+	async function getModes() {
+		let modes: MenuItem[] = [];
+		for (let mode of Object.values(Mode)
+			.filter((x) => !isNaN(Number(x)))
+			.map((x) => Number(x))) {
+			modes.push({
+				name: Mode[mode],
+				icon: mode === $settings.mode ? 'checkmark' : '',
+				action: async () => {
+					let tmpSettings = $settings;
+					tmpSettings.mode = mode;
+					settings.set(tmpSettings);
+
+					saveSettings();
+
+					await getModes();
+				}
+			});
+		}
+
+		await insertMenu(['Modes'], modes, true);
+	}
 
 	async function onKeyDown(event: KeyboardEvent) {
 		switch (event.key) {
@@ -237,7 +268,7 @@
 		width: 100%;
 		height: 100%;
 		z-index: 999;
-		background-color: rgba(0, 0, 0, 0.5);
+		background-color: rgba(0, 0, 0, 0.75);
 	}
 
 	.window {
