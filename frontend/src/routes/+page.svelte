@@ -20,7 +20,7 @@
 	let finishedDetails: KeyracerFinishDetails;
 
 	settings.subscribe(async (x) => {
-        if(!x) return;
+		if (!x) return;
 
 		await getWordsList();
 		await getInput();
@@ -74,6 +74,8 @@
 				alert('Error');
 			}
 		});
+
+		await getInput();
 	}
 
 	async function getWordsList() {
