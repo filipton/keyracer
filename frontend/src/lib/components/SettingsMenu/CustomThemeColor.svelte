@@ -1,8 +1,12 @@
 <script lang="ts">
+	import { settings } from '$lib/stores';
 	import { getCookie, setCookie } from '$lib/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { saveSettings, type Settings } from './settingsUtils';
 
 	let dispatch = createEventDispatcher();
+
+	let customName: string = 'custom';
 
 	let bgColor: string = '#000000';
 	let fgColor: string = '#ffffff';
@@ -29,9 +33,32 @@
 		lCaretColor = customTheme[7];
 	});
 
+	function onNameChange() {
+		if (customName == '') customName = 'custom';
+
+		let customThemes = $settings.customThemes;
+		if (customThemes !== null && Object.keys(customThemes).includes(customName)) {
+			// @ts-ignore
+			let theme = customThemes[customName];
+			if (theme !== undefined) {
+				let themeArr = theme.split(',');
+
+				bgColor = themeArr[0];
+				fgColor = themeArr[1];
+				lCorrectColor = themeArr[2];
+				lNsColor = themeArr[3];
+				lIncorrectColor = themeArr[4];
+				lExtraColor = themeArr[5];
+				lIncorrectUnderline = themeArr[6];
+				lCaretColor = themeArr[7];
+
+				updateTheme();
+			}
+		}
+	}
+
 	function updateTheme(changeCookie: boolean = false) {
 		let customTheme = `${bgColor},${fgColor},${lCorrectColor},${lNsColor},${lIncorrectColor},${lExtraColor},${lIncorrectUnderline},${lCaretColor}`;
-		if (changeCookie) setCookie('theme', customTheme, 365);
 
 		document.documentElement.style.setProperty('--bg-color', bgColor);
 		document.documentElement.style.setProperty('--fg-color', fgColor);
@@ -41,6 +68,20 @@
 		document.documentElement.style.setProperty('--l-extra-color', lExtraColor);
 		document.documentElement.style.setProperty('--l-incorrect-underline', lIncorrectUnderline);
 		document.documentElement.style.setProperty('--l-caret-color', lCaretColor);
+
+		if (!changeCookie) return;
+		setCookie('theme', customTheme, 365);
+
+		let _settings: Settings = $settings;
+		if (!$settings.customThemes) {
+			_settings.customThemes = new Map();
+		}
+
+		// @ts-ignore
+		_settings.customThemes[customName] = customTheme;
+
+		settings.set(_settings);
+		saveSettings();
 	}
 </script>
 
@@ -116,15 +157,19 @@
 		</div>
 	</div>
 
-	<button
-		class="btn update-theme"
-		on:click={() => {
-			updateTheme(true);
-			dispatch('close');
-		}}
-	>
-		Update theme
-	</button>
+	<div class="update-theme">
+		<label for="custom-name">Custom name</label>
+		<input type="text" id="custom-name" bind:value={customName} on:change={onNameChange} />
+		<button
+			class="btn"
+			on:click={() => {
+				updateTheme(true);
+				dispatch('close');
+			}}
+		>
+			Update theme
+		</button>
+	</div>
 </div>
 
 <style>
@@ -145,8 +190,23 @@
 	}
 
 	.update-theme {
-		margin-top: 2em;
-		margin-bottom: 1em;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		width: 100%;
+		margin: 1em auto;
+	}
+	.update-theme > input {
+		border: 3px solid var(--fg-color);
+		background-color: var(--bg-color);
+		border-radius: 5px;
+		color: var(--fg-color);
+		padding: 15px 0;
+		text-align: center;
+		font-size: 1em;
+		margin: 4px 2px;
+		outline: none;
 	}
 
 	.floating-window > .container {

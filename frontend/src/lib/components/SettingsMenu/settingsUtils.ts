@@ -36,11 +36,13 @@ export function changeTheme(selectedTheme: string) {
 
 export type Settings = {
     mode: number;
+    customThemes: Map<string, string>;
 };
 
 export function loadSettings() {
     let tmpSettings: Settings = {
-        mode: 0
+        mode: 0,
+        customThemes: new Map()
     };
 
     let settingsStr = localStorage.getItem('settings');

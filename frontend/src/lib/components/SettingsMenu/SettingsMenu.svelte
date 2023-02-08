@@ -27,6 +27,12 @@
 			name: 'Modes',
 			action: () => {},
 			sub: []
+		},
+		{
+			name: 'Custom Theme',
+			action: () => {
+				customThemeSelector = true;
+			}
 		}
 	];
 
@@ -60,6 +66,8 @@
 	}
 
 	async function onKeyDown(event: KeyboardEvent) {
+		if (customThemeSelector) return;
+
 		switch (event.key) {
 			case 'ArrowUp':
 				event.preventDefault();
@@ -145,14 +153,18 @@
 			});
 		}
 
-		tmpThemes.push({
-			name: 'custom',
-			icon: [...themes.values()].filter((x) => x === currentTheme).length === 0 ? 'checkmark' : '',
-			action: async () => {
-				customThemeSelector = true;
-				await getThemes();
+		if ($settings.customThemes) {
+			for (let theme of Object.entries($settings.customThemes)) {
+				tmpThemes.push({
+					name: theme[0],
+					icon: theme[1] === currentTheme ? 'checkmark' : '',
+					action: async () => {
+						changeTheme(theme[1]);
+						await getThemes();
+					}
+				});
 			}
-		});
+		}
 
 		await insertMenu(['Themes'], tmpThemes, true);
 	}
