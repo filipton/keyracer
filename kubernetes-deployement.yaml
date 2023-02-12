@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keyracer
+spec:
+  selector:
+    matchLabels:
+      app: keyracer
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: keyracer
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: keyracer-client
+        image: filipton/keyracer-client:latest
+        ports:
+        - containerPort: 3000
+          name: web
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            port: web
+            path: /
+      - name: keyracer-server
+        image: filipton/keyracer-server:latest
+        env: 
+        - name: DB_URL
+          value: postgres://user:pass@hostname:port/dbname
+        ports:
+        - containerPort: 8080
+          name: web2
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            port: web2
+            path: /api/test
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keyracer-cip
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: keyracer
+  ports:
+    - name: server
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: client
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keyracer-ing
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: "kr.filipton.space"
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: keyracer-cip
+              port:
+                number: 3000
+        - path: /api
+          pathType: Prefix
+          backend:
+            service:
+              name: keyracer-cip
+              port:
+                number: 8080
+
