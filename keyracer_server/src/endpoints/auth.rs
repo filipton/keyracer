@@ -98,7 +98,7 @@ pub async fn auth_session(
     return HttpResponse::Ok().json(user_info);
 }
 
-#[get("/logout")]
+#[post("/logout")]
 pub async fn logout(data: web::Data<AppState>, session_id: web::Json<String>) -> impl Responder {
     let session_id = session_id.into_inner();
 
