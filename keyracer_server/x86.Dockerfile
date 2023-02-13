@@ -2,7 +2,6 @@ FROM debian:testing-slim
 WORKDIR /app
 COPY ./words_list.txt .
 COPY ./quotes.json .
-COPY ./certs.json .
 
 RUN apt update -y && apt install libssl-dev -y
 

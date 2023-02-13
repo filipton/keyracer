@@ -32,7 +32,6 @@ async fn main() -> std::io::Result<()> {
                     .replace("\r", ""),
 
                 quotes_list: std::fs::read_to_string("./quotes.json").unwrap(),
-                google_jwks: google_keys.clone(),
             };
 
             let cors = actix_cors::Cors::default()
@@ -48,6 +47,7 @@ async fn main() -> std::io::Result<()> {
         }
         .service(
             web::scope("/api/auth")
+                .service(endpoints::auth::logout)
                 .service(endpoints::auth::get_user_info)
                 .service(endpoints::auth::google_auth)
                 .service(endpoints::auth::auth_session),

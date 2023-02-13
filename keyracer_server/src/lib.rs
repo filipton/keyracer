@@ -1,6 +1,3 @@
-use jsonwebtoken::DecodingKey;
-use std::collections::HashMap;
-
 pub mod structs;
 pub mod utils;
 
@@ -17,5 +14,4 @@ pub struct AppState {
 
     pub words_list: String,
     pub quotes_list: String,
-    pub google_jwks: HashMap<String, DecodingKey>,
 }

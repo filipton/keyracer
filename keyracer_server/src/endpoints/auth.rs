@@ -10,7 +10,7 @@ use base64::{
     Engine as _,
 };
 
-use crate::{structs::GoogleClaims, AppState};
+use crate::{structs::GoogleClaims, utils::get_google_certs, AppState};
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct JwtHeader {
@@ -35,10 +35,11 @@ pub async fn google_auth(data: web::Data<AppState>, token: web::Json<String>) ->
         .decode(token.split('.').collect::<Vec<&str>>()[0])
         .unwrap();
 
+    // get_google_certs will throw an error if the certs url is ratelimited (maybe cache this?)
     let header: JwtHeader = serde_json::from_str(str::from_utf8(&header_json).unwrap()).unwrap();
     let google_claims = jsonwebtoken::decode::<GoogleClaims>(
         &token,
-        &data.google_jwks[&header.kid],
+        &get_google_certs().await.unwrap()[&header.kid],
         &Validation::new(Algorithm::RS256),
     )
     .unwrap()
@@ -95,6 +96,19 @@ pub async fn auth_session(
     .unwrap();
 
     return HttpResponse::Ok().json(user_info);
+}
+
+#[get("/logout")]
+pub async fn logout(data: web::Data<AppState>, session_id: web::Json<String>) -> impl Responder {
+    let session_id = session_id.into_inner();
+
+    let _ = sqlx::query("DELETE FROM sessions WHERE token = $1")
+        .bind(session_id)
+        .execute(&data.pool)
+        .await
+        .unwrap();
+
+    return HttpResponse::Ok().finish();
 }
 
 // this should be /users/{id}
