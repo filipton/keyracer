@@ -13,6 +13,7 @@
 
 	let debug: boolean = false;
 	let finished: boolean = false;
+	let restartButtonShown: boolean = false;
 
 	let input: string;
 
@@ -50,6 +51,7 @@
 	async function finishWriting(args: any) {
 		finishedDetails = args.detail;
 		finished = true;
+		restartButtonShown = true;
 
 		let keystrokesStr: string = finishedDetails.history
 			.map((x) => `${x.time}><${x.input}`)
@@ -62,6 +64,7 @@
 			history: keystrokesStr
 		};
 
+		if (!$page.data.user || !$page.data.token) return;
 		await fetch(`${apiUrl}/results`, {
 			method: 'POST',
 			headers: {
@@ -74,8 +77,6 @@
 				alert('Error');
 			}
 		});
-
-		await getInput();
 	}
 
 	async function getWordsList() {
@@ -91,15 +92,27 @@
 		]);
 	}
 
+	async function restart() {
+		if (!restartButtonShown) return;
+
+		finished = false;
+		restartButtonShown = false;
+
+		await getInput();
+	}
+
 	async function onKeyDown(event: KeyboardEvent) {
 		if (event.key === '~' && event.ctrlKey) {
 			event.preventDefault();
 			debug = !debug;
 		}
 
-		if (finished && event.key === 'Tab') {
+		if (event.key === 'Tab') {
 			event.preventDefault();
 			restartButton.focus();
+			restartButtonShown = true;
+		} else if (event.key !== 'Enter' && !finished) {
+			restartButtonShown = false;
 		}
 	}
 </script>
@@ -120,24 +133,30 @@
 		<div class="main-screen">
 			<h2>STATS</h2>
 			<KeyracerStats details={finishedDetails} />
-
-			<button
-				style="margin-top: auto; margin-bottom: 10px;"
-				class="btn"
-				bind:this={restartButton}
-				on:click={() => {
-					finished = false;
-				}}
-				><span class="btn-tooltip">ENTER</span>
-				RESTART</button
-			>
 		</div>
 	{:else if input}
 		<KeyracerInput {input} {debug} on:finished={finishWriting} />
 	{/if}
+
+	<button
+		style="{restartButtonShown ? 'opacity: 1;' : 'opacity: 0;'}}"
+		class="btn restartButton"
+		on:click={restart}
+		bind:this={restartButton}
+		><span class="btn-tooltip">ENTER</span>
+		RESTART</button
+	>
 </div>
 
 <style>
+	.restartButton {
+		position: absolute;
+		bottom: 10px;
+
+		opacity: 0;
+		transition: opacity 0.5s;
+	}
+
 	.container {
 		display: flex;
 		justify-content: center;
