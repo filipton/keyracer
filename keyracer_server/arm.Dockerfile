@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:backworm-slim
 WORKDIR /app
 COPY ./words_list.txt .
 COPY ./quotes.json .
