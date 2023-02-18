@@ -6,7 +6,6 @@ use keyracer_server::AppState;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
-    let google_keys = get_google_certs().await.unwrap();
 
     let mut port = 8080;
     match std::env::var("PORT") {

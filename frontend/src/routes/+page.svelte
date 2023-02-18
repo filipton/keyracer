@@ -111,6 +111,8 @@
 			event.preventDefault();
 			restartButton.focus();
 			restartButtonShown = true;
+        } else if(event.key === " " && restartButtonShown) {
+            await restart();
 		} else if (event.key !== 'Enter' && !finished) {
 			restartButtonShown = false;
 		}
