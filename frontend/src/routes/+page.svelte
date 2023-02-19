@@ -74,7 +74,7 @@
 			body: JSON.stringify(data)
 		}).then(async (x: Response) => {
 			if (!x.ok) {
-				alert('Error');
+				console.error('Error while saving results');
 			}
 		});
 	}
