@@ -57,5 +57,5 @@ jobs:
       - name: Install dependencies & build
         run: pnpm install && pnpm build
       - name: "Docker build image"
-        run: docker buildx build --platform linux/amd64 --tag filipton/keyracer-client:latest --push -f .Dockerfile .
+        run: docker buildx build --platform linux/aarch64 --tag filipton/keyracer-client:latest --push -f .Dockerfile .
 
